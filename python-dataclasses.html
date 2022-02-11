@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>
+    Reducing boilerplate with Python dataclasses
+  </title>
+  <meta name="author" content="Ellen Potter" />
+
+  <script>
+    // PrismJS is used for code syntax highlighting when JS is enabled.
+    document.documentElement.classList.remove("no-js");
+  </script>
+
+  <link rel="stylesheet" href="css/prism.min.css" />
+  <link rel="stylesheet" href="css/styles.min.css" />
+</head>
+
+<body>
+  <nav class="row">
+    <div class="nav-section">
+      <div class="nav-item"><a href="index.html">Home</a></div>
+      <div class="nav-item"><a type="application/rss+xml" href="feed.xml">RSS</a></div>
+    </div>
+    <div class="nav-item"><a href="about.html">About</a></div>
+  </nav>
+
+  <main>
+    <h1>Reducing boilerplate with Python dataclasses</h1>
+    <p>I used to think of dataclasses as something like a fancy namedtuple. To borrow an example from the <a
+        href="https://docs.python.org/3/library/collections.html#collections.namedtuple">Python
+        docs</a>, I might do this</p>
+    <pre><code class="language-python">
+from dataclasses import dataclass
+
+@dataclass
+class Point:
+    x: float
+    y: float
+    </code></pre>
+    <p>rather than this</p>
+    <pre><code class="language-python">
+from collections import namedtuple
+
+Point = namedtuple("Point", ["x", "y"])
+    </code></pre>
+    <p>But it turns out dataclasses are a lot more useful that. Rather than "fancy namedtuples", dataclasses are more
+      like "fancy
+      classes". They can</p>
+    <ul>
+      <li>help classes behave in a Pythonic way</li>
+      <li>reduce boilerplate</li>
+    </ul>
+
+    <p>All at the same time! Here's a simplified Book written as a standard class.</p>
+    <pre><code class="language-python">
+class Book:
+    def __init__(self, title, author, year=2022):
+        self.title = title
+        self.author = author
+        self.year = year
+
+    def __repr__(self):
+        return f"Book(title={self.title}, author={self.author}, year={self.year})"
+
+    def cite(self):
+        return f"{self.author}, {self.title} ({self.year})"
+    </code></pre>
+
+    <p>That works. But there's a chunk of boilerplate to give the Book instance its data and get a nice string
+      representation. Only the <code>cite</code> method has logic that's particularly specific to the Book
+      class. (The attribute names reflect Book characteristics, like title, but nothing uniquely book-like happens in
+      the <code>__init__</code> or <code>__repr___</code>.)
+    </p>
+    <p>Worse, this class can't be used in some basic ways. Python doesn't know how to compare Book instances, so doesn't
+      recognise when one book is the same as another and can't sort a list of books.</p>
+    <pre><code class="language-python">
+book = Book("Histories", "Herodotus", -430)
+identical_book = Book("Histories", "Herodotus", -430)
+book == identical_book
+# False
+
+book2 = Book("The History of England", "Thomas Macauly", 1848)
+sorted([book, book2])
+# TypeError: '<' not supported between instances of 'Book' and 'Book'
+      </code></pre>
+
+    <p>The Book class has a <code>__repr__</code> method, allowing the use of both
+      <code>str(book)</code> and <code>repr(book)</code>. But it doesn't have other dunder (double underscore) methods
+      that support operators like <code>==</code> and <code><</code>. In other words, a little more boilerplate is
+      needed.
+    </p>
+    <pre><code class="language-python">
+from functools import total_ordering
+
+@total_ordering
+class Book:
+    # Methods hidden for brevity
+    # __init__, __repr__, cite
+  
+    def __eq__(self, other):
+        # If both objects are books, check if all values are equal
+        # If other object is not a Book, let Python raise a TypeError
+        if other.__class__ is self.__class__:
+            return (self.title, self.author, self.year) == (other.title, other.author, other.year)
+        return NotImplemented
+    
+    def __gt__(self, other):
+        # If both objects are books, check if values of the book on the left are 
+        # greater than values on the right
+        if other.__class__ is self.__class__:
+            return (self.title, self.author, self.year) > (other.title, other.author, other.year)
+        return NotImplemented
+    
+      </code></pre>
+    <p>Book instances can now be compared and sorted, thanks to the <code>__eq__</code> (equality) and
+      <code>__gt__</code>
+      (greater than) dunder methods and <a
+        href="https://docs.python.org/3/library/functools.html#functools.total_ordering">total_ordering</a> decorator.
+      The decorator isn't essential; it reduces repetition by letting the programmer define
+      <code>__eq__</code> and one other comparison dunder method (<code>__gt__</code>, in this case). Without
+      <code>total_ordering</code>, it
+      would be necessary to add the other comparison dunder methods: <code>__gte__</code>, <code>__lt__</code> and
+      <code>__lte__</code>.
+    </p>
+
+    <p>A dataclass provides this behaviour with even less effort. The class and dataclass below, shown side by side,
+      work identically. They have the same init behaviour, same string representation, even the same comparison and sort
+      behaviour. But the dataclass takes care of the boilerplate.</p>
+
+    <div class="compare-code">
+      <pre><code class="language-python">
+from dataclasses import dataclass
+
+@dataclass(order=True)
+class Book:
+    title: str
+    author: str
+    year: int = 2022
+
+    def cite(self):
+        return f"{self.author}, {self.title} ({self.year})"
+    </code></pre>
+      <pre><code class="language-python">
+from functools import total_ordering
+
+@total_ordering
+class Book:
+    def __init__(self, title, author, year=2022):
+        self.title = title
+        self.author = author
+        self.year = year
+
+    def __repr__(self):
+        return f"Book(title={self.title}, author={self.author}, year={self.year})"
+    
+    def __eq__(self, other):
+        if other.__class__ is self.__class__:
+            return (self.title, self.author, self.year) == (other.title, other.author, other.year)
+        return NotImplemented
+
+    def __gt__(self, other):
+      if other.__class__ is self.__class__:
+          return (self.title, self.author, self.year) > (other.title, other.author, other.year)
+      return NotImplemented
+
+    def cite(self):
+        return f"{self.author}, {self.title} ({self.year})"
+    </code></pre>
+    </div>
+
+    <p>Dataclasses allow some simple customisation. In the example above, <code>order=True</code> is used to add
+      comparison behaviour to the class. By default, dataclasses only provide <code>__init__</code>,
+      <code>__repr__</code> and <code>__eq__</code>. (In other words, that's what you get when using the dataclass
+      decorator
+      without any arguments.) Behaviours can be turned off by passing the relevant argument to the decorator,
+      e.g. <code>repr=False</code> or, in some cases, defining the method youself, e.g. adding your own
+      <code>__repr__</code> to the class.
+    </p>
+    <pre><code class="language-python">
+from dataclasses import dataclass
+
+# Default settings (automatic __init__, __repr__, __eq__)
+@dataclass
+class Book:
+    title: str
+    author: str
+    year: int = 2022
+
+
+# Don't create __repr__ method
+@dataclass(repr=False)
+class Book:
+    title: str
+    author: str
+    year: int = 2022
+
+
+# Use custom __repr__ method
+@dataclass
+class Book:
+    title: str
+    author: str
+    year: int = 2022
+
+    def __repr__(self):
+        return f"Book: {self.title}"
+    </code></pre>
+    <p>After a certain point, it's worth implementing the dunder methods manually rather than tweaking and
+      overriding dataclass behaviour. For example, the preferred ordering of Books might not be title, then author, then
+      year. Perhaps ordering should happen author first. Or perhaps the author shouldn't be included in the ordering at
+      all.
+      In cases like those, custom dunder methods are still needed.</p>
+    <p>Dataclasses do a lot, though, and they're a great way to add Pythonic behaviour to classes.</p>
+
+    <h2>Useful things</h2>
+    <p>For more info about dataclasses, try Eric V. Smith's proposal for adding them to Python, <a
+        href="https://www.python.org/dev/peps/pep-0557/">PEP 557 -- Data
+        Classes</a>. It's excellent and I wish I'd read it
+      sooner.
+    </p>
+    <p>Dunder methods (a.k.a. magic methods) can add a lot more Pythonic behaviour to custom classes, e.g. letting them
+      behave like Python lists with indexing, slicing and looping. I like Rafe Kettler's <a
+        href="https://rszalski.github.io/magicmethods/">Guide to
+        Python's Magic Methods</a>. A few things are specific
+      to Python 2, but they're noted in the short appendix and aren't likely to be relevant when
+      you're starting out. In my experience, it's easiest to start with
+      "Comparison magic methods" and then move onto "Making custom sequences", which are things that behave like lists.
+    </p>
+
+  </main>
+
+  <footer>&copy; Ellen Potter</footer>
+
+  <script src="js/prism.js"></script>
+</body>
+
+</html>

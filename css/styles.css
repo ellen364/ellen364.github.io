@@ -1,0 +1,163 @@
+/*
+* Copyright 2022 Ellen Potter
+* Free to use under the MIT license.
+*
+* Inspired by Barebones v3 and Water.css
+* https://github.com/acahir/Barebones
+* https://github.com/kognise/water.css
+*/
+
+
+
+/* Table of contents
+––––––––––––––––––––––––––––––––––––––––––––––––––
+- CSS variables
+- Base styles
+- Layout
+- Typography
+- Code
+- Navbar
+*/
+
+
+
+/* CSS variables
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+:root {
+  --background: #ffffff;
+  --text-main: #000000;
+  --text-bright: #000000;
+  --text-muted: #70777f;
+  --links: #0076d1;
+}
+
+@media (prefers-color-scheme: dark) {
+:root {
+  --background: #21252b;
+  --text-main: #abb2bf;
+  --text-bright: #cccccc;
+  --text-muted: #a9b1ba;
+  --links: #519aba;
+}
+}
+
+
+
+/* Base styles
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+html {
+  scroll-behavior: smooth;
+}
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+  color: var(--text-main); 
+  background-color: var(--background);
+}
+main {
+  margin: 0 auto; /* Only needed for larger screens? */
+  padding: 0 1rem;  /* Keep a little space at the edge of the text, even when screens v small. */
+}
+@media (min-width: 800px) {
+  main {
+    width: 75%;
+  }
+}
+
+
+
+/* Layout
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+.row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+.row .pub-date {
+  display: flex;
+  flex: 0 0 25%;
+}
+@media (min-width: 800px) {
+.row .pub-date {
+  flex: 0 0 20%;
+}
+}
+/* Use when comparing code side by side */
+.compare-code {
+  display: flex;
+  flex-direction: row;
+  gap: 1px;
+}
+.compare-code pre {
+  display: flex;
+  flex: 50%;
+}
+
+
+
+/* Typography
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+a {
+  text-decoration: none;
+  color: var(--links);
+}
+a:hover {
+  text-decoration: underline;
+}
+
+
+
+/* Code
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+/* Replce PrismJS fonts */
+code {
+  /* Feb 2022: ui-monospace has little browser adoption
+     https://qwtel.com/posts/software/the-monospaced-system-ui-css-font-stack/ */
+  font-family: ui-monospace, 
+             Menlo, Monaco, 
+             "Cascadia Mono", "Segoe UI Mono", 
+             "Roboto Mono", 
+             "Oxygen Mono", 
+             "Ubuntu Monospace", 
+             "Source Code Pro",
+             "Fira Mono", 
+             "Droid Sans Mono", 
+             "Courier New", monospace;
+  white-space: pre; 
+}
+/* Fallback when can't use PrismJS syntax highlighting due to no JS
+   Still inherit things like whitespace settings from prism.css */
+.no-js pre {
+  outline: 1px solid var(--text-muted);
+  padding: 0 1rem;
+  overflow: auto;
+}
+.no-js pre > code {
+  color: var(--text-main);
+}
+
+
+
+/* Navbar
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+nav {
+  justify-content: space-between;
+  border-bottom: 0.15rem solid var(--text-main); 
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+.nav-section {
+  display: flex;
+}
+.nav-item {
+  padding: 0.5rem 0.9rem;
+}
+.nav-item a:hover,
+.nav-item a:focus {
+  text-decoration: none;
+  outline: 1px solid var(--links);
+}

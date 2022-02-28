@@ -6,6 +6,11 @@
         <description>Notes on software development.</description>
         <language>en-gb</language>
         <item>
+            <title>Updating Python using Pyenv and Poetry</title>
+            <link>https://ellen364.github.io/updating-python-using-pyenv-poetry.html</link>
+            <pubDate>Mon, 28 Feb 2022 13:00:00 GMT</pubDate>
+        </item>
+        <item>
             <title>Reducing boilerplate with Python dataclasses</title>
             <link>https://ellen364.github.io/python-dataclasses.html</link>
             <pubDate>Fri, 11 Feb 2022 21:30:00 GMT</pubDate>

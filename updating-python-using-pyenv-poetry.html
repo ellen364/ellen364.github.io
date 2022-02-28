@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>
+      Updating Python using Pyenv and Poetry
+    </title>
+    <meta name="author" content="Ellen Potter" />
+
+    <script>
+      // PrismJS is used for code syntax highlighting when JS is enabled.
+      document.documentElement.classList.remove("no-js");
+    </script>
+
+    <link rel="stylesheet" href="css/prism.min.css" />
+    <link rel="stylesheet" href="css/styles.min.css" />
+  </head>
+
+  <body>
+    <nav class="row">
+      <div class="nav-section">
+        <div class="nav-item"><a href="index.html">Home</a></div>
+        <div class="nav-item">
+          <a type="application/rss+xml" href="feed.xml">RSS</a>
+        </div>
+      </div>
+      <div class="nav-item"><a href="about.html">About</a></div>
+    </nav>
+
+    <main>
+      <h1>Updating Python using Pyenv and Poetry</h1>
+      <p>
+        This isn't rocket science but is something I do infrequently enough to
+        forget steps.
+      </p>
+      <p>
+        In code blocks, lines beginning <code>$</code> are commands and lines
+        without show output. There are a few simple bash commands (e.g.
+        <code>cd</code>).
+      </p>
+      <p>
+        It's assumed that you already use Pyenv and Poetry and want to change a
+        project's Python version.
+      </p>
+      <p>
+        If you just want the steps, skip to
+        <a href="#the-code">all the code</a>.
+      </p>
+
+      <h2>Optional: Store virtual environment in project</h2>
+      <p>
+        By default, Poetry creates virtual environments outside of projects, in
+        Poetry's own cache directory. (Usually something like
+        /home/ellen/.cache/pypoetry/virtualenvs.)
+      </p>
+      <p>
+        I've started to prefer venvs in their project directories. There's
+        something tidy about having everything in the project directory. If I've
+        messed something up and want to delete the venv, I don't have to
+        remember which directory it was created in. VSCode also notices a venv
+        created in a project and asks if I want to start using it, which means a
+        little less configuration.
+      </p>
+      <p>One time change:</p>
+      <pre><code class="language-bash">
+$ poetry config virtualenvs.in-project true
+      </code></pre>
+
+      <h2>Install the preferred version of Python</h2>
+      <p>
+        If Pyenv was installed a while ago, there are probably new Python patch
+        releases and maybe even a new minor version. The code uses Python 3.10
+        as an example.
+      </p>
+      <pre><code class="language-bash">
+$ pyenv update  # Update Pyenv and the list of available Python versions
+$ pyenv install --list | grep "3.10"  # Check which versions of 3.10 are available
+$ pyenv install 3.10.2  # This will take a while
+
+$ cd a_project_directory
+$ pyenv local 3.10.2  # Creates file .python-version, telling Pyenv which version to use when in the directory
+    </code></pre>
+
+      <h2>Replace virtual environment</h2>
+      <p>
+        The existing venv was created using the old version of Python and should
+        be replaced. It's also worth telling Poetry which version of Python to
+        use because Poetry doesn't always grab the right one. (The behaviour can
+        depend on things like which Poetry installer you used and whether you
+        installed Poetry or Pyenv first. More info in GitHub issues
+        <a href="https://github.com/python-poetry/poetry/issues/5077">5077</a>
+        and
+        <a href="https://github.com/python-poetry/poetry/issues/5190">5190</a>.)
+      </p>
+      <p>
+        The code example assumes the existing virtual environment was created in
+        the project directory.
+      </p>
+      <pre><code class="language-bash">
+$ rm -rf .venv
+$ poetry env use $(pyenv which python)
+$ poetry install
+      </code></pre>
+
+      <h2>A note on shims and debugging</h2>
+      <p>
+        Pyenv uses shims to select and run the expected version of Python. In
+        other words, Pyenv intercepts calls related to Python and decides which
+        Python executable to use. That's why you can type <code>python</code> in
+        one directory and expect a Python 3.8.12 shell, while expecting that
+        <code>python</code> in another directory will start a Python 3.10.2
+        shell. That's incredibly useful but adds a little complexity.
+      </p>
+      <p>
+        When getting an unexpected version of Python, it can be useful to check
+        both the system's builtin <code>which</code> command and Pyenv's
+        <code>which</code> command.
+      </p>
+      <pre><code class="language-bash">
+$ which python
+/home/ellen/.pyenv/shims/python
+# defers to Pyenv
+
+$ pyenv which python
+/home/ellen/.pyenv/versions/3.10.2/bin/python
+# the Python exectuable that will be used
+</code></pre>
+
+      <p>
+        It can also be useful to check the virtual environment's configuration
+        file pyvenv.cfg
+      </p>
+      <pre><code class="language-bash">
+$ cat .venv/pyvenv.cfg
+base-executable = /home/ellen/.pyenv/versions/3.10.2/bin/python
+# plus other info about the configuration of the venv
+</code></pre>
+
+      <p>
+        If several things are trying to set the version (e.g. environment
+        variable and .python-version file), refer to Pyenv's documentation about
+        <a href="https://github.com/pyenv/pyenv#choosing-the-python-version"
+          >how it chooses which version to use</a
+        >.
+      </p>
+
+      <h2 id="the-code">All the code</h2>
+      <p>Assumes you have a virtual environment in the project directory.</p>
+      <pre><code class="language-bash">
+$ pyenv update
+$ pyenv install --list | grep "3.10"
+$ pyenv install 3.10.2
+
+$ cd a_project_directory
+$ pyenv local 3.10.2
+
+$ rm -rf .venv
+$ poetry env use $(pyenv which python)
+$ poetry install
+      </code></pre>
+    </main>
+
+    <footer>&copy; Ellen Potter</footer>
+
+    <script src="js/prism.js"></script>
+  </body>
+</html>

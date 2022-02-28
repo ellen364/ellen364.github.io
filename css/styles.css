@@ -7,8 +7,6 @@
 * https://github.com/kognise/water.css
 */
 
-
-
 /* Table of contents
 ––––––––––––––––––––––––––––––––––––––––––––––––––
 - CSS variables
@@ -18,8 +16,6 @@
 - Code
 - Navbar
 */
-
-
 
 /* CSS variables
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -32,16 +28,14 @@
 }
 
 @media (prefers-color-scheme: dark) {
-:root {
-  --background: #21252b;
-  --text-main: #abb2bf;
-  --text-bright: #cccccc;
-  --text-muted: #a9b1ba;
-  --links: #519aba;
+  :root {
+    --background: #21252b;
+    --text-main: #abb2bf;
+    --text-bright: #cccccc;
+    --text-muted: #a9b1ba;
+    --links: #519aba;
+  }
 }
-}
-
-
 
 /* Base styles
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -49,21 +43,20 @@ html {
   scroll-behavior: smooth;
 }
 body {
-  font-family: system-ui, -apple-system, 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
-  color: var(--text-main); 
+  font-family: system-ui, -apple-system, "Segoe UI Emoji", "Apple Color Emoji",
+    "Noto Color Emoji", sans-serif;
+  color: var(--text-main);
   background-color: var(--background);
 }
 main {
   margin: 0 auto; /* Only needed for larger screens? */
-  padding: 0 1rem;  /* Keep a little space at the edge of the text, even when screens v small. */
+  padding: 0 1rem; /* Keep a little space at the edge of the text, even when screens v small. */
 }
 @media (min-width: 800px) {
   main {
     width: 75%;
   }
 }
-
-
 
 /* Layout
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -82,9 +75,9 @@ footer {
   flex: 0 0 25%;
 }
 @media (min-width: 800px) {
-.row .pub-date {
-  flex: 0 0 20%;
-}
+  .row .pub-date {
+    flex: 0 0 20%;
+  }
 }
 /* Use when comparing code side by side */
 .compare-code {
@@ -97,8 +90,6 @@ footer {
   flex: 50%;
 }
 
-
-
 /* Typography
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 a {
@@ -109,25 +100,16 @@ a:hover {
   text-decoration: underline;
 }
 
-
-
 /* Code
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 /* Replce PrismJS fonts */
 code {
   /* Feb 2022: ui-monospace has little browser adoption
      https://qwtel.com/posts/software/the-monospaced-system-ui-css-font-stack/ */
-  font-family: ui-monospace, 
-             Menlo, Monaco, 
-             "Cascadia Mono", "Segoe UI Mono", 
-             "Roboto Mono", 
-             "Oxygen Mono", 
-             "Ubuntu Monospace", 
-             "Source Code Pro",
-             "Fira Mono", 
-             "Droid Sans Mono", 
-             "Courier New", monospace;
-  white-space: pre; 
+  font-family: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono",
+    "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro",
+    "Fira Mono", "Droid Sans Mono", "Courier New", monospace;
+  white-space: pre;
 }
 /* Fallback when can't use PrismJS syntax highlighting due to no JS
    Still inherit things like whitespace settings from prism.css */
@@ -140,13 +122,11 @@ code {
   color: var(--text-main);
 }
 
-
-
 /* Navbar
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 nav {
   justify-content: space-between;
-  border-bottom: 0.15rem solid var(--text-main); 
+  border-bottom: 0.15rem solid var(--text-main);
   font-weight: 600;
   font-size: 1.1rem;
 }

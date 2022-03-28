@@ -20,20 +20,20 @@
 /* CSS variables
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 :root {
-  --background: #ffffff;
-  --text-main: #000000;
-  --text-bright: #000000;
-  --text-muted: #70777f;
-  --links: #0076d1;
+  --background: #21252b;
+  --text-main: #abb2bf;
+  --text-bright: #cccccc;
+  --text-muted: #a9b1ba;
+  --links: #519aba;
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
-    --background: #21252b;
-    --text-main: #abb2bf;
-    --text-bright: #cccccc;
-    --text-muted: #a9b1ba;
-    --links: #519aba;
+    --background: #fbfcfa;
+    --text-main: #2f2f2f;
+    --text-bright: #000000;
+    --text-muted: #70777f;
+    --links: #0076d1;
   }
 }
 

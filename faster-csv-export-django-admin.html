@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>
+      Faster CSV export from the Django admin
+    </title>
+    <meta name="author" content="Ellen Potter" />
+
+    <script>
+      // PrismJS is used for code syntax highlighting when JS is enabled.
+      document.documentElement.classList.remove("no-js");
+    </script>
+
+    <link rel="stylesheet" href="css/prism.min.css" />
+    <link rel="stylesheet" href="css/styles.min.css" />
+  </head>
+
+  <body>
+    <nav class="row">
+      <div class="nav-section">
+        <div class="nav-item"><a href="index.html">Home</a></div>
+        <div class="nav-item">
+          <a type="application/rss+xml" href="feed.xml">RSS</a>
+        </div>
+      </div>
+      <div class="nav-item"><a href="about.html">About</a></div>
+    </nav>
+
+    <main>
+      <h1>Faster CSV export from the Django admin</h1>
+
+      <p>
+        Adding a CSV download button to the Django admin is a common approach
+        when internal users need to be able to download data. It's simple to add
+        and takes advantage of existing features, like the admin itself and the
+        permissions framework.
+      </p>
+
+      <p>
+        The Django Admin Cookbook even provides sample code:
+        <a
+          href="https://books.agiliq.com/projects/django-admin-cookbook/en/latest/export.html"
+          >How to export CSV from Django admin?</a
+        >
+        (The cookbook hasn't been updated in a while but remains a useful
+        resource, especially for developers working with the admin for the first
+        time.) The Cookbook code adds a new option "Export selected" to the
+        "Action" dropdown on each model's list page, which is a nice use of the
+        standard admin UI.
+      </p>
+
+      <p>
+        The downside is that it's slow. Luckily, generating the CSV becomes much
+        more efficient after minor changes to the code.
+      </p>
+
+      <p>
+        If you just want that revised code, without the explanation, skip to the
+        <a href="#tldr">TLDR</a>.
+      </p>
+
+      <h2 id="a-quick-walk-through-the-original-version">
+        A quick walk through the original version
+      </h2>
+
+      <p>Here's the original code.</p>
+
+      <pre><code class="language-python">
+import csv
+from django.http import HttpResponse
+
+
+class ExportCsvMixin:
+    def export_as_csv(self, request, queryset):
+        meta = self.model._meta
+        field_names = [field.name for field in meta.fields]
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = "attachment; filename={}.csv".format(meta)
+
+        writer = csv.writer(response)
+        writer.writerow(field_names)
+        for obj in queryset:
+            row = writer.writerow([getattr(obj, field) for field in field_names])
+
+        return response
+
+    export_as_csv.short_description = "Export Selected"
+</code></pre>
+
+      <p>
+        It's a simple class, with a single method, that can be used with
+        Django's standard <code>ModelAdmin</code> class. The
+        <code>export_as_csv</code> method expects a <code>request</code> and a
+        <code>queryset</code>, which are passed by other methods in the admin
+        class. The queryset holds whatever records the user selected via the
+        Django admin.
+      </p>
+
+      <p>
+        In the function body, some metadata is retrieved from the model whose
+        data is being downloaded. The model name becomes part of the CSV
+        filename and the model field names are used to create the CSV's header
+        row.
+      </p>
+
+      <p>
+        The main work happens in the <code>for</code> loop, where each record in
+        the queryset becomes a row in the CSV.
+      </p>
+
+      <p>
+        Finally, the CSV response is returned, which starts the user's file
+        download.
+      </p>
+
+      <h2 id="why-its-slow">Why it's slow</h2>
+
+      <p>
+        The problem with the original implementation is the
+        <code>for</code> loop. The loop builds up the CSV row by row using
+        <code>writerow</code>. There's also a sneaky second loop - a list
+        comprehension that gets the value of each field. This happens inside the
+        <code>for</code> loop, so it gets the value for each field of each
+        record.
+      </p>
+
+      <p>
+        <code>writerow</code> expects a "row" and the
+        <a href="https://docs.python.org/3/library/csv.html#writer-objects"
+          >Python 3 docs</a
+        >
+        say a row is "an iterable of strings or numbers for Writer objects". The
+        queryset itself is iterable but the objects within it aren't.
+      </p>
+
+      <p>
+        Here's an example that tries to pass each model instance to
+        <code>writerow</code>. It's a simplified version of the original code,
+        without the bits specific to the Django admin. (The example uses models
+        from
+        <a href="https://github.com/ellen364/Django-Hospital">Django-Hospital</a
+        >, which I wrote to help some junior developers learn Django queries. If
+        you want to try the examples yourself, you can clone Django-Hospital.)
+      </p>
+
+      <pre><code class="language-python">
+import csv
+from hospital.models import Doctor
+
+with open("/home/ellen/doctors.csv", "w") as f:
+    field_names = [field.name for field in Doctor._meta.fields]
+    writer = csv.writer(f)
+    writer.writerow(field_names)
+
+    for obj in Doctor.objects.all():
+        writer.writerow(obj)
+
+# Error: iterable expected, not Doctor
+</code></pre>
+
+      <p>
+        As expected, the individual objects within a queryset are not iterable
+        and don't count as rows. Because Django has returned a queryset of
+        not-iterable model instances, the ExportCsvMixin transforms each model
+        instance to a list that can be passed to <code>writerow</code>.
+        Generating the CSV would be faster without that transformation step.
+      </p>
+
+      <h2 id="using-a-different-data-structure">
+        Using a different data structure
+      </h2>
+
+      <p>
+        Luckily, Django's queryset methods don't have to return a queryset of
+        model instances, they can return other data structures.
+      </p>
+
+      <p>
+        The most commonly used methods, e.g. <code>all</code> and
+        <code>filter</code>, do return a queryset of ORM objects. But there are
+        other methods:
+      </p>
+
+      <ul>
+        <li><code>values</code> returns a queryset of dictionaries</li>
+        <li><code>values_list</code> returns a queryset of tuples</li>
+      </ul>
+
+      <p>
+        The
+        <a
+          href="https://docs.djangoproject.com/en/4.0/ref/models/querysets/#values-list"
+          >docs for Django 4.0</a
+        >
+        say "values() and values_list() are both intended as optimizations for a
+        specific use case: retrieving a subset of data without the overhead of
+        creating a model instance." In other words, Django does less work before
+        returning the queryset.
+      </p>
+
+      <p>
+        Even better, <code>values_list</code> returns a queryset of tuples,
+        which is an iterable (queryset) of iterables (tuples). That meets the
+        definition of a "row" expected by <code>csv.writerow</code> and the
+        "iterable of rows" expected by <code>csv.writerows</code>. So the
+        queryset itself can be passed to <code>csv.writerows</code>, avoiding
+        the need for any transformation steps.
+      </p>
+
+      <p>The simplified version looks like this.</p>
+
+      <pre><code class="language-python">
+import csv
+from hospital.models import Doctor
+
+with open("/home/ellen/doctors.csv", "w") as f:
+    field_names = [field.name for field in Doctor._meta.fields]
+    writer = csv.writer(f)
+    writer.writerow(field_names)
+    writer.writerows(Doctor.objects.values_list(*field_names))
+</code></pre>
+
+      <h2 id="whats-the-improvement">What's the improvement?</h2>
+
+      <p>
+        While working on this, I did some rough timings to confirm the expected
+        improvement actually happened. Those timings are outlined below. The
+        short version is the new code reduced the time to generate a CSV by 66%.
+      </p>
+
+      <p>
+        To do the checks, I created some basic data in the form of 1,000,000
+        identical doctors.
+      </p>
+
+      <pre><code class="language-python">
+from hospital.models import Doctor
+
+new_doctors = [
+    Doctor(
+        first_name="John",
+        last_name="Snow",
+        birth_year=1813,
+        position=Doctor.ATTENDING,
+        speciality=Doctor.GENERAL,
+    )
+    for _ in range(1000000)
+]
+Doctor.objects.bulk_create(new_doctors, batch_size=3000)
+</code></pre>
+
+      <p>
+        Then I used the
+        <a
+          href="https://ipython.readthedocs.io/en/stable/interactive/magics.html#magic-timeit"
+          >timeit "magic command"</a
+        >
+        in an iPython shell. Because I planned to do a few runs with
+        <code>timeit</code>, I didn't want to faff around with files and used
+        StringIO instead. (As a reminder, these timings weren't an exercise in
+        precision, but a simple check on what I was doing.)
+      </p>
+
+      <p>
+        Times were taken on a machine with 1.8GHz Intel i7-8550U (8 cores) and
+        8GB RAM. Your own times will vary.
+      </p>
+
+      <h3 id="original">Original</h3>
+
+      <pre><code class="language-python">
+%%timeit
+
+import csv
+import io
+from hospital.models import Doctor
+
+buffer = io.StringIO()
+
+field_names = [field.name for field in Doctor._meta.fields]
+writer = csv.writer(buffer)
+writer.writerow(fields)
+for obj in Doctor.objects.all():
+  writer.writerow([getattr(obj, field) for field in field_names])
+
+buffer.close()
+
+# 6.51 s ± 169 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+</code></pre>
+
+      <h3 id="revised">Revised</h3>
+
+      <pre><code class="language-python">
+%%timeit
+
+import csv
+import io
+from hospital.models import Doctor
+
+buffer = io.StringIO()
+
+field_names = [field.name for field in Doctor._meta.fields]
+writer = csv.writer(buffer)
+writer.writerow(field_names)
+writer.writerows(Doctor.objects.values_list(*field_names))
+
+buffer.close()
+
+# 2.22 s ± 31.8 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+</code></pre>
+
+      <h2 id="bonus-why-not-dictwriter">Bonus: Why not DictWriter?</h2>
+
+      <p>
+        Given that the Django <code>values</code> queryset method returns a
+        queryset of dictionaries, you might have wondered "Why not use
+        <code>csv.DictWriter</code>?"
+      </p>
+
+      <p>
+        In this case, it's a less efficient option. <code>values</code>, like
+        <code>values_list</code>, avoids the overhead of creating model
+        instances. However, a quick look at the DictWriter code shows a problem.
+      </p>
+
+      <pre><code class="language-python">
+# cpython/Lib/csv.py
+
+class DictWriter:
+    # some methods skipped for brevity
+
+    def _dict_to_list(self, rowdict):
+        if self.extrasaction == "raise":
+            wrong_fields = rowdict.keys() - self.fieldnames
+            if wrong_fields:
+                raise ValueError("dict contains fields not in fieldnames: "
+                                 + ", ".join([repr(x) for x in wrong_fields]))
+        return (rowdict.get(key, self.restval) for key in self.fieldnames)
+
+    def writerow(self, rowdict):
+        return self.writer.writerow(self._dict_to_list(rowdict))
+
+    def writerows(self, rowdicts):
+        return self.writer.writerows(map(self._dict_to_list, rowdicts))
+</code></pre>
+
+      <p>
+        The name of the <code>_dict_to_list</code> method immediately raises
+        questions. Its return statement is reminiscent of the original export
+        CSV code, looping over each field of each object to create an iterable.
+        The <code>DictWriter.writerow</code> and
+        <code>DictWriter.writerows</code> methods confirm that DictWriter uses
+        <code>_dict_to_list</code> and passes the result to the standard
+        <code>writer</code> implementation.
+      </p>
+
+      <p>
+        So using <code>csv.DictWriter</code> adds a transformation step that
+        isn't immediately obvious because it happens in the CPython code. In
+        this case, it's better to fetch the data from the database as a list of
+        tuples and pass it directly to <code>csv.writer</code>.
+      </p>
+
+      <h3 id="tldr">TLDR</h3>
+
+      <p>
+        The faster CSV mixin. Plus examples of use in an admin.py and a snippet
+        of test code.
+      </p>
+
+      <pre><code class="language-python">
+# mixin.py
+import csv
+from django.http import HttpResponse
+
+
+class ExportCsvMixin:
+    def export_as_csv(self, request, queryset):
+        meta = self.model._meta
+        field_names = [field.name for field in meta.fields]
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = "attachment; filename={}.csv".format(meta)
+
+        writer = csv.writer(response, fieldnames=field_names)
+        writer.writerow(field_names)
+        writer.writerows(queryset.values_list(*field_names))
+
+        return response
+
+    export_as_csv.short_description = "Export Selected"
+
+
+# admin.py
+from django.contrib import admin
+from hospital.mixins import ExportCsvMixin
+from hospital.models import Doctor
+
+@admin.register(Doctor)
+class DoctorAdmin(ExportCsvMixin, admin.ModelAdmin):
+    pass
+
+
+# snippet for tests
+from django.test import RequestFactory
+from hospital.models import Doctor
+
+request = RequestFactory().get("/admin")
+queryset = Doctor.objects.all()
+ExportCsvMixin().export_as_csv(request, queryset)
+</code></pre>
+
+      <h2 id="useful-things">Useful things</h2>
+
+      <ul>
+        <li>
+          <a
+            href="https://www.hacksoft.io/blog/django-orm-under-the-hood-iterables"
+            >Django ORM Under the Hood - Iterables</a
+          >
+          looks at some of the Django classes that make querysets iterable.
+        </li>
+        <li>
+          <a
+            href="http://www.lucainvernizzi.net/blog/2015/08/03/8x-speed-up-for-python-s-csv-dictwriter/"
+            >8x speedup for Python's csv.DictWriter</a
+          >
+          profiles code using DictWriter and shows a bottleneck. The article was
+          published in 2015 but the "extrasaction" default can still cause
+          unexpectedly slow code.
+        </li>
+      </ul>
+    </main>
+
+    <footer>&copy; Ellen Potter</footer>
+
+    <script src="js/prism.js"></script>
+  </body>
+</html>

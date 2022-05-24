@@ -6,6 +6,11 @@
         <description>Notes on software development.</description>
         <language>en-gb</language>
         <item>
+            <title>Faster CSV export from the Django admin</title>
+            <link>https://ellen364.github.io/faster-csv-export-django-admin.html</link>
+            <pubDate>Mon, 24 May 2022 19:45:00 GMT</pubDate>
+        </item>
+        <item>
             <title>Updating Python using Pyenv and Poetry</title>
             <link>https://ellen364.github.io/updating-python-using-pyenv-poetry.html</link>
             <pubDate>Mon, 28 Feb 2022 13:00:00 GMT</pubDate>

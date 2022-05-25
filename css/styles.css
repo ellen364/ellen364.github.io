@@ -99,6 +99,14 @@ a {
 a:hover {
   text-decoration: underline;
 }
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-block-start: 1.4em;
+  margin-block-end: 0.7em;
+}
 
 /* Code
 –––––––––––––––––––––––––––––––––––––––––––––––––– */

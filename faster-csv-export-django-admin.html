@@ -31,6 +31,25 @@
 
     <main>
       <h1>Faster CSV export from the Django admin</h1>
+      <ul>
+        <li>
+          <a href="#a-quick-walk-through-the-original-version"
+            >A quick walk through the original version</a
+          >
+        </li>
+        <li><a href="#why-its-slow">Why it's slow</a></li>
+        <li>
+          <a href="#using-a-different-data-structure"
+            >Using a different data structure</a
+          >
+        </li>
+        <li><a href="#whats-the-improvement">What's the improvement?</a></li>
+        <li>
+          <a href="#bonus-why-not-dictwriter">Bonus: Why not DictWriter?</a>
+        </li>
+        <li><a href="#tldr">TLDR</a></li>
+        <li><a href="#useful-things">Useful things</a></li>
+      </ul>
 
       <p>
         Adding a CSV download button to the Django admin is a common approach

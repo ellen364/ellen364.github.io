@@ -31,6 +31,29 @@
 
     <main>
       <h1>Updating Python using Pyenv and Poetry</h1>
+      <ul>
+        <li>
+          <a href="#optional-store-virtual-environment-in-project"
+            >Optional: Store virtual environment in project</a
+          >
+        </li>
+        <li>
+          <a href="#install-the-preferred-version-of-python"
+            >Install the preferred version of Python</a
+          >
+        </li>
+        <li>
+          <a href="#replace-the-virtual-environment"
+            >Replace virtual environment</a
+          >
+        </li>
+        <li>
+          <a href="#a-note-on-shims-and-debugging"
+            >A note on shims and debugging</a
+          >
+        </li>
+        <li><a href="#all-the-code">All the code</a></li>
+      </ul>
       <p>
         This isn't rocket science but is something I do infrequently enough to
         forget steps.
@@ -46,10 +69,12 @@
       </p>
       <p>
         If you just want the steps, skip to
-        <a href="#the-code">all the code</a>.
+        <a href="#all-the-code">all the code</a>.
       </p>
 
-      <h2>Optional: Store virtual environment in project</h2>
+      <h2 id="optional-store-virtual-environment-in-project">
+        Optional: Store virtual environment in project
+      </h2>
       <p>
         By default, Poetry creates virtual environments outside of projects, in
         Poetry's own cache directory. (Usually something like
@@ -68,7 +93,9 @@
 $ poetry config virtualenvs.in-project true
       </code></pre>
 
-      <h2>Install the preferred version of Python</h2>
+      <h2 id="install-the-preferred-version-of-python">
+        Install the preferred version of Python
+      </h2>
       <p>
         If Pyenv was installed a while ago, there are probably new Python patch
         releases and maybe even a new minor version. The code uses Python 3.10
@@ -83,7 +110,7 @@ $ cd a_project_directory
 $ pyenv local 3.10.2  # Creates file .python-version, telling Pyenv which version to use when in the directory
     </code></pre>
 
-      <h2>Replace virtual environment</h2>
+      <h2 id="replace-the-virtual-environment">Replace virtual environment</h2>
       <p>
         The existing venv was created using the old version of Python and should
         be replaced. It's also worth telling Poetry which version of Python to
@@ -104,7 +131,7 @@ $ poetry env use $(pyenv which python)
 $ poetry install
       </code></pre>
 
-      <h2>A note on shims and debugging</h2>
+      <h2 id="a-note-on-shims-and-debugging">A note on shims and debugging</h2>
       <p>
         Pyenv uses shims to select and run the expected version of Python. In
         other words, Pyenv intercepts calls related to Python and decides which
@@ -146,7 +173,7 @@ base-executable = /home/ellen/.pyenv/versions/3.10.2/bin/python
         >.
       </p>
 
-      <h2 id="the-code">All the code</h2>
+      <h2 id="all-the-code">All the code</h2>
       <p>Assumes you have a virtual environment in the project directory.</p>
       <pre><code class="language-bash">
 $ pyenv update

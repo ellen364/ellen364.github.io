@@ -6,9 +6,14 @@
         <description>Notes on software development.</description>
         <language>en-gb</language>
         <item>
+            <title>Exploring browser history using Python's sqlite3 module (plus: finding the database with proc or lsof)</title>
+            <link>https://ellen364.github.io/exploring-browser-history.html</link>
+            <pubDate>Wed, 25 May 2022 16:00:00 GMT</pubDate>
+        </item>
+        <item>
             <title>Faster CSV export from the Django admin</title>
             <link>https://ellen364.github.io/faster-csv-export-django-admin.html</link>
-            <pubDate>Mon, 24 May 2022 19:45:00 GMT</pubDate>
+            <pubDate>Tue, 24 May 2022 19:45:00 GMT</pubDate>
         </item>
         <item>
             <title>Updating Python using Pyenv and Poetry</title>

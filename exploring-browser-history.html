@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>
+      Exploring browser history using Python's sqlite3 module (plus: finding the
+      database with proc or lsof)
+    </title>
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+
+    <script>
+      // PrismJS is used for code syntax highlighting when JS is enabled.
+      document.documentElement.classList.remove("no-js");
+    </script>
+
+    <link rel="stylesheet" href="css/prism.min.css" />
+    <link rel="stylesheet" href="css/styles.min.css" />
+  </head>
+
+  <body>
+    <nav class="row">
+      <div class="nav-section">
+        <div class="nav-item"><a href="index.html">Home</a></div>
+        <div class="nav-item">
+          <a type="application/rss+xml" href="feed.xml">RSS</a>
+        </div>
+      </div>
+      <div class="nav-item"><a href="about.html">About</a></div>
+    </nav>
+
+    <main>
+      <h1>
+        Exploring browser history using Python's sqlite3 module (plus: finding
+        the database with proc or lsof)
+      </h1>
+      <ul>
+        <li>
+          <a href="#finding-the-browser-history">Finding the browser history</a>
+        </li>
+        <li>
+          <a href="#exploring-the-history-database-using-sqlite3"
+            >Exploring the history database using sqlite3</a
+          >
+        </li>
+        <li>
+          <a href="#finding-the-browser-history-proc-edition"
+            >Finding the browser history, proc edition</a
+          >
+        </li>
+        <li>
+          <a href="#finding-the-browser-history-lsof-edition"
+            >Finding the browser history, lsof edition</a
+          >
+        </li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#useful-things">Useful things</a></li>
+      </ul>
+      <p>
+        Recently I've been trying different search engines like
+        <a href="https://duckduckgo.com">DuckDuckGo</a> and
+        <a href="https://kagi.com">Kagi</a>. I started wondering how how often
+        I'm falling back to Google. Am I habitually using Google search? Or
+        perhaps not finding what I want via other search engines?
+      </p>
+      <p>
+        Rather than looking in the History tab, I decided to grab the data
+        myself. Perhaps I'd visualise the data or do something interesting with
+        it. (Spoiler: I didn't. But I did play around with proc and Python's
+        sqlite3, the subjects of this post.)
+      </p>
+      <p>
+        Fair warning: this post isn't a "how to". I like reading about how
+        someone worked something out and this post is in that style. Essentially
+        it's "How I learned a little about how my browser stores data".
+      </p>
+
+      <h2 id="finding-the-browser-history">Finding the browser history</h2>
+      <p>
+        I don't usually pay attention to my browser history and had no idea
+        where it's stored. Luckily, Mozilla explains
+        <a
+          href="https://support.mozilla.org/en-US/kb/profiles-where-firefox-stores-user-data"
+          >where Firefox stores all sorts of data</a
+        >, from bookmarks and history to your personal dictionary and toolbar
+        customisations.
+      </p>
+      <p>
+        On Ubuntu, the Firefox history is stored in
+        <code>~/.mozilla/firefox/$your_profile_directory/places.sqlite</code>
+        where <code>$your_profile_directory</code> has a value specific to you,
+        but probably includes the word "default".
+      </p>
+
+      <h2 id="exploring-the-history-database-using-sqlite3">
+        Exploring the history database using sqlite3
+      </h2>
+      <p>
+        Next challenge: how do I query a SQLite database using Python?
+      </p>
+      <p>
+        I was surprised to realise that I didn't know this. (If I'm working with
+        a database in Python, usually I'm using Django.) I had vague memories of
+        using a sqlite package, though not the last time I used it. Turns out
+        it's the
+        <a href="https://docs.python.org/3/library/sqlite3.html"
+          >sqlite3 module</a
+        >
+        in Python's standard library.
+      </p>
+      <p>
+        The official docs are mostly a description of the API but also contain
+        useful advice. At the end is
+        <a
+          href="https://docs.python.org/3/library/sqlite3.html#using-sqlite3-efficiently"
+          >"Using sqlite3 efficiently"</a
+        >. I didn't read that right away, so I spent a while manually fiddling
+        with <code>Cursor</code> objects instead of letting sqlite3 do it for
+        me. The section has other useful tips and is well worth reading.
+      </p>
+      <p>Anyway, time for a bit of database exploration.</p>
+
+      <pre><code class="language-python">
+import sqlite3
+from pathlib import Path
+
+# In my case, the path was approximately
+FIREFOX_PATH = Path.home() / ".mozilla/firefox/fi3dmgd.default-release/places.sqlite"
+db = sqlite3.connect(FIREFOX_PATH)
+
+# What tables do I have?
+db.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
+
+# Lots of tables... moz_historyvisits looks promising. What's in it?
+db.execute("SELECT * FROM moz_historyvisits").fetchmany(3)
+
+# Hmm. That only shows data (row content). What are the columns?
+db.execute("SELECT name from PRAGMA_TABLE_INFO('moz_historyvisits');").fetchall()
+
+# No URL, but there is a place_id. Presumably a foreign key to the places table. What's in that?
+db.execute("SELECT name from PRAGMA_TABLE_INFO('moz_places');").fetchall()
+
+# Found the URL. (Plus some surpising things like rev_host, the host name stored reversed.)
+# So I need something like this:
+db.execute(
+    """
+    SELECT visit_date, url FROM moz_historyvisits
+    LEFT JOIN moz_places on moz_historyvisits.place_id = moz_places.id
+    WHERE moz_places.url LIKE 'https://kagi.com%' OR moz_places.url LIKE 'https://duckduckgo.com%' OR moz_places.url LIKE 'https://www.google.co%/search?%'
+    """
+)
+
+db.close()
+</code></pre>
+      <p>
+        It took a while to work out how to list tables or columns. A lot of
+        information about SQLite assumes the reader is using SQLite's CLI, but
+        convenience commands like
+        <code>.tables</code>
+        don't exist in the Python sqlite3 module. SQLite does, however, have
+        <a href="https://sqlite.org/pragma.html">PRAGMA statements</a>, an
+        extension to normal SQL. They mostly seem to let you query database
+        metadata.
+      </p>
+      <p>
+        I also tweaked the Google match string a couple of times. Initially it
+        was too broad, matching pages from Google Maps and other bits of the
+        Google ecosystem. In a different way, the first version was too narrow
+        because I wanted results for google.com and google.co.uk.
+      </p>
+      <p>
+        More importantly: this code isn't production-ready. It doesn't handle
+        errors and because I was doing simple, one-off SELECTs, I didn't care
+        about things like transactions or rollback behaviour.
+      </p>
+
+      <h2 id="finding-the-browser-history-proc-edition">
+        Finding the browser history, proc edition
+      </h2>
+      <p>
+        That was Firefox done, but I've also been trying the Vivaldi browser.
+        Rather than look up where Vivaldi stores its data, I decided to work
+        this one out myself.
+      </p>
+      <p>
+        Thinking through options, <code>find</code> didn't seem promising
+        because I didn't know what the file would be called or whether it would
+        definitely be another SQLite database.
+      </p>
+      <p>
+        Another option was <code>strace</code>, which seems incredibly useful
+        <a href="https://jvns.ca/categories/strace/"
+          >whenever Julia Evans writes about it</a
+        >. Connecting to the Vivaldi process with <code>strace</code> proved
+        pretty overwhelming and I still wasn't sure what I was looking for.
+      </p>
+      <p>
+        But I figured that Vivaldi probably accesses the history a lot. And it
+        probably needs other config and data files, which are likely to be in a
+        directory near wherever the history is stored. All of which meant I
+        could probably find the history by looking at the files Vivalidi had
+        open.
+      </p>
+      <p>
+        Enter <code>/proc</code>, which exposes a great deal of information
+        about the OS, including information about running processes. I knew that
+        <code>/proc/some_pid/fd</code> would show me the files (fd = file
+        descriptors) the process has open. So first I needed to find the Vivaldi
+        process ID (pid).
+      </p>
+      <pre><code class="language-bash">
+$ ps -ef | grep vivaldi
+ellen   27852       1  1 08:37 ?   00:00:11 /opt/vivaldi/vivaldi-bin --enable-crashpad
+ellen   27865   27852  0 08:37 ?   00:00:00 /opt/vivaldi/vivaldi-bin --type=zygote --no-zygote-sandbox --enable-crashpad --crashpad-handler-pid=27859 --enable-crash-reporter=,stable --change-stack-guard-on-fork=enable --enable-crashpad
+ellen   27866   27852  0 08:37 ?   00:00:00 /opt/vivaldi/vivaldi-bin --type=zygote --enable-crashpad --crashpad-handler-pid=27859 --enable-crash-reporter=,stable --change-stack-guard-on-fork=enable --enable-crashpad
+ellen   27868   27866  0 08:37 ?   00:00:00 /opt/vivaldi/vivaldi-bin --type=zygote --enable-crashpad --crashpad-handler-pid=27859 --enable-crash-reporter=,stable --change-stack-guard-on-fork=enable --enable-crashpad
+# ... Lots more output skipped for brevity
+        </code></pre>
+      <p>
+        There were a lot more Vivaldi processes than I expected. But now I knew
+        the process was called vivaldi-bin and the parent (main) process had pid
+        27852. (The number next to 27852 is the pid of its own parent, in this
+        case 1, aka systemd, which starts programs.)
+      </p>
+      <p>
+        (If you're wondering how I know this, it's from using commands like
+        <code>pstree -ps some_pid</code>, which shows the full tree of processes
+        for the specified pid, including systemd which is the root of the tree.)
+      </p>
+      <p>
+        If I'd been more observant at that point, I could have answered my
+        question "Where's the browser data?" One of the Vivaldi processes runs
+        with the option
+        <code>--database=~/.config/vivaldi/Crash Reports</code> and it seems
+        reasonable to guess the history database is stored somewhere near the
+        Crash Reports. But I didn't notice that at the time.
+      </p>
+      <p>Instead, I took the longer route and used /proc</p>
+
+      <pre><code class="language-bash">
+$ ls -l /proc/27852/fd
+
+# Most output skipped for brevity
+total 0
+lr-x------ 1 ellen ellen 64 May 25 14:26 0 -> /dev/null
+l-wx------ 1 ellen ellen 64 May 25 14:26 1 -> 'pipe:[52909]'
+lrwx------ 1 ellen ellen 64 May 25 14:26 10 -> 'socket:[61453]'
+lrwx------ 1 ellen ellen 64 May 25 14:26 158 -> /home/ellen/.config/vivaldi/Default/History-journal
+lrwx------ 1 ellen ellen 64 May 25 14:26 47 -> /home/ellen/.config/vivaldi/Default/History
+      </code></pre>
+
+      <p>
+        Using the <code>file</code> command confirmed that "History" was an
+        SQLite database, so I figured that was probably the file I wanted.
+      </p>
+      <p>
+        This post is already long, so I won't show code snippets exploring this
+        database. The short version: there's a table called "visits", which has
+        the visit time and a foreign key to a table called "urls". The "urls"
+        table contains the URL itself and the page title.
+      </p>
+
+      <h2 id="finding-the-browser-history-lsof-edition">
+        Finding the browser history, lsof edition
+      </h2>
+      <p>
+        Shortly after I'd found the file using /proc, I realised that I could
+        have achieved the same thing using the command <code>lsof</code> (ls
+        open files), which would have looked something like this.
+      </p>
+      <pre><code class="language-bash">
+$ ps -ef | grep vivaldi
+ellen   27852   1  1 08:37 ?   00:00:11 /opt/vivaldi/vivaldi-bin --enable-crashpad
+
+$ lsof -p 27852 | grep REG
+vivaldi-b 1306111 ellen  mem-w    REG    8,2   1802240  9965138 /home/ellen/.config/vivaldi/Default/History
+vivaldi-b 1306111 ellen   69uw    REG    8,2   1802240  9965138 /home/ellen/.config/vivaldi/Default/History
+vivaldi-b 1306111 ellen  152u     REG    8,2      8720  9965158 /home/ellen/.config/vivaldi/Default/History-journal
+# As ever, lots of output skipped for brevity
+      </code></pre>
+      <p>
+        The <code>-p</code> flag shows all the open files for the specified pid.
+        That includes a lot of things like sockets, which I didn't care about.
+        The REG type are "regular files", so I grepped that.
+      </p>
+      <p>
+        I haven't used <code>lsof</code> much, but I suspect it's usually a
+        better option than directly accessing /proc. Whoever wrote
+        <code>lsof</code> probably knew a lot more about the Linux file system
+        than I do and knew more of the edge cases. But it's handy to know what
+        data <code>lsof</code> is accessing.
+      </p>
+
+      <h2 id="results">Results</h2>
+      <p>
+        As for my search engine experiment, the results aren't interesting yet.
+        Since signing up for the Kagi beta, it seems to be my default search
+        engine. It's possible that's because it's the newest and shiniest search
+        engine. But it also suggests that I haven't had much reason to fall back
+        to Google.
+      </p>
+      <p>
+        Of course, I could have more easily learned that from the History panels
+        of the various browsers. But it's fun to see how things work behind the
+        UI and I got to play a little with the sqlite3 module.
+      </p>
+
+      <h2 id="useful-things">Useful things</h2>
+      <p>
+        The Python docs all-too-easy-to-miss advice for using the sqlite3
+        module:
+        <a
+          href="https://docs.python.org/3/library/sqlite3.html#using-sqlite3-efficiently"
+          >Using sqlite3 efficiently</a
+        >.
+      </p>
+    </main>
+    <footer>&copy; Ellen Potter</footer>
+
+    <script src="js/prism.js"></script>
+  </body>
+</html>

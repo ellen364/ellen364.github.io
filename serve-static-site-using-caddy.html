@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>
+      How to serve a static site using Caddy
+    </title>
+    <meta name="author" content="Ellen Potter" />
+
+    <script>
+      // PrismJS is used for code syntax highlighting when JS is enabled.
+      document.documentElement.classList.remove("no-js");
+    </script>
+
+    <link rel="stylesheet" href="css/prism.min.css" />
+    <link rel="stylesheet" href="css/styles.min.css" />
+    <link
+      rel="canonical"
+      href="https://ellen.dev/serve-static-site-using-caddy.html"
+    />
+  </head>
+
+  <body>
+    <nav class="row">
+      <div class="nav-section">
+        <div class="nav-item"><a href="index.html">Home</a></div>
+        <div class="nav-item">
+          <a type="application/rss+xml" href="feed.xml">RSS</a>
+        </div>
+      </div>
+      <div class="nav-item"><a href="about.html">About</a></div>
+    </nav>
+
+    <main>
+      <h1 id="how-to-serve-a-static-site-using-caddy">
+        How to serve a static site using Caddy
+      </h1>
+      <ul>
+        <li><a href="#install-caddy-on-server">Install Caddy on server</a></li>
+        <li><a href="#check-caddy-is-running">Check Caddy is running</a></li>
+        <li>
+          <a href="#put-the-static-files-on-the-server"
+            >Put the static files on the server</a
+          >
+        </li>
+        <li>
+          <a href="#a-quick-detour-http">A quick detour: start with HTTP</a>
+        </li>
+        <li>
+          <a href="#write-a-simple-caddyfile">Write a simple Caddyfile</a>
+        </li>
+        <li>
+          <a href="#use-the-new-caddyfile">Use the new Caddyfile</a>
+        </li>
+        <li><a href="#it-isnt-working">It isn't working...</a></li>
+        <li>
+          <a href="#edit-caddyfile-to-serve-via-https-on-your-domain"
+            >Edit Caddyfile to serve via HTTPS on your domain</a
+          >
+        </li>
+        <li>
+          <a href="#it-isnt-working-round-2">It isn't working... (round 2)</a>
+        </li>
+        <li><a href="#tldr">TLDR</a></li>
+        <li><a href="#useful-things">Useful things</a></li>
+      </ul>
+
+      <p>
+        Here's a "how to" for serving a static site from Caddy, with a side of
+        debugging advice and a few sysadmin tips.
+      </p>
+
+      <p>
+        When I started using Caddy I found the documentation a bit hit and miss.
+        Some of it's great, but after reading the docs I didn't always
+        understand how simple things fit together. When setting up my first
+        Caddy server, I also realised that I'd become used to automated
+        deployments and was surprised by simple things like "Where should the
+        files go on the server??" The how to covers a few of those topics as
+        well.
+      </p>
+
+      <h2 id="install-caddy-on-server">Install Caddy on server</h2>
+
+      <p>
+        The official website has good instructions for
+        <a href="https://caddyserver.com/docs/install">installing Caddy</a> on
+        your server. For Linux, the most common server OS, the instructions
+        mostly involve running commands to add a new package repository.
+      </p>
+
+      <p>
+        Since there's some copy-pasting, it's worth following that old sysadmin
+        trick: type the comment symbol <code>#</code> at the start of the line,
+        then paste the command. Because the command is a comment, it won't run
+        unexpectedly even if a newline gets copied into the terminal. When
+        you're sure the command is right, remove the <code>#</code> comment
+        symbol and run.
+      </p>
+
+      <h2 id="check-caddy-is-running">Check Caddy is running</h2>
+
+      <p>
+        By default, Caddy runs in the background via systemd. Caddy seems to
+        automatically start itself after installation, but it's worth
+        double-checking using
+      </p>
+
+      <pre><code class="language-text">
+$ systemctl status caddy
+
+# Start of output
+# ● caddy.service - Caddy
+#     Loaded: loaded (/lib/systemd/system/caddy.service; enabled; vendor preset: enabled)
+#     Active: active (running) since Fri 2022-06-03 07:32:56 UTC; 1 weeks 5 days ago
+#       Docs: https://caddyserver.com/docs/
+</code></pre>
+
+      <p>
+        Most of the time, you'll want Caddy to be running and enabled. (Where
+        "running" means that Caddy is on and "enabled" means that Caddy will
+        automatically start after a server reboot.) Luckily, these seem to be
+        the default settings.
+      </p>
+
+      <h2 id="put-the-static-files-on-the-server">
+        Put the static files on the server
+      </h2>
+
+      <p>
+        For the purposes of the article, I'm going to assume the static site has
+        a really simple directory structure:
+      </p>
+
+      <pre><code class="language-text">
+static-site/
+    index.html
+    a-post.html
+    styles.css
+</code></pre>
+
+      <p>At this stage, there are a couple of decisions to make.</p>
+
+      <p>
+        Decision one is how you'll put files onto the server. There are lots of
+        ways of doing that, so it's really down to your preferences. For simple
+        static sites, I like to make the directory a git repo, clone it on the
+        server and <code>git pull</code> to get updates. Depending on your
+        situation, all sorts of things from <code>rsync</code> to a CI/CD
+        pipeline could be decent options.
+      </p>
+
+      <p>
+        Decision two is where the static site directory will live. I've found it
+        most convenient to put the static site directory inside the directory
+        <code>/var/www</code>, e.g. <code>/var/www/my-static-site</code>. It
+        seems to be a common location, so there's a decent chance it will be
+        familiar to other developers. Log files often go into the nearby
+        <code>/var/log</code> (discussed in a moment), which keeps everything
+        close together in the directory structure.
+      </p>
+
+      <p>
+        Once you've decided where the files are going and how you'll do it, put
+        the static files onto the server.
+      </p>
+
+      <p>
+        After copying the files, make sure the <code>caddy</code> user can read
+        the static site directory. If the caddy user can't access the directory,
+        you'll get get permission errors when Caddy tries to access and serve
+        the files.
+      </p>
+
+      <p>
+        For those learning Linux,
+        <code>ls -l</code> is a useful way of checking the owner and group
+        permissions of the directory. If the output is scary and unfamiliar,
+        it's worth reading this short overview of
+        <a
+          href="https://linuxfoundation.org/blog/classic-sysadmin-understanding-linux-file-permissions/"
+          >file permissions</a
+        >.
+      </p>
+
+      <h2 id="a-quick-detour-http">A quick detour: start with HTTP</h2>
+
+      <p>
+        For simple static sites, I tend to start by serving the files via HTTP
+        and without a domain.
+      </p>
+
+      <p>
+        A great feature of Caddy is the
+        <a href="https://caddyserver.com/docs/automatic-https"
+          >"automatic HTTPS"</a
+        >, which means that Caddy gets the TLS certificate and keeps it renewed.
+        But there's a gotcha - if you make lots of mistakes while setting up,
+        you'll hit the rate limits of certificate providers. The Caddy
+        documentation suggests the longest ban is 1 week.
+      </p>
+
+      <p>
+        So for a brand new Caddyfile I tend to check that everything works over
+        HTTP. When I'm confident in the basic setup, I move to HTTPS. An
+        alternative approach is to use a certificate authority's
+        <a href="https://caddyserver.com/docs/automatic-https#testing"
+          >staging URL</a
+        >
+        for ACME challenges. It's worth considering for more complex sites,
+        espeially if you might send or receive sensitive data during the initial
+        setup.
+      </p>
+
+      <h2 id="write-a-simple-caddyfile">Write a simple Caddyfile</h2>
+
+      <p>
+        At this point Caddy is running but not actually serving anything. It's
+        time to write a Caddyfile, which will tell Caddy how to serve the site.
+      </p>
+
+      <p>
+        The default Caddyfile, created by Caddy on installation, is
+        <code>/etc/caddy/Caddyfile</code>. Edit that file to add your own
+        settings.
+      </p>
+
+      <p>
+        This particular Caddyfile serves the static site via port 80 (HTTP, not
+        HTTPS).
+      </p>
+
+      <pre><code class="language-text">
+:80 {
+    root * /var/www/my-static-site
+    encode gzip
+    file_server {
+        hide .git
+    }
+
+    log {
+        output file /var/log/caddy/my-static-site.log
+    }
+
+    header {
+        ?Cache-Control "max-age=1800"
+    }
+}
+</code></pre>
+
+      <p>
+        Caddy has good defaults, so there's a lot less boilerplate than I tend
+        to see in Nginx configs. You might even find that some of these settings
+        are irrelevant to you and can be removed.
+      </p>
+
+      <p>
+        The :80 is a "block" and everything inside it is scoped to that block.
+        You can have different blocks for different domains, perhaps serving
+        different static sites.
+      </p>
+
+      <p>
+        In this case, Caddy is told to act as a file server, returning files
+        from the directory <code>/var/www/my-static-site</code>. Caddy will
+        return the index.html when someone goes to your root url. (The user
+        doesn't have to include index.html at the end of the url.)
+      </p>
+
+      <p>
+        The line inside the
+        <code>file_server</code> block says that the <code>.git</code> directory
+        shouldn't be served, so a user shouldn't be able to navigate to
+        <code>https://example.com/.git</code>
+      </p>
+
+      <p>
+        The line <code>encode gzip</code> means the files will be compressed
+        using gzip and the Content-Encoding in the
+        <a
+          href="https://developer.mozilla.org/en-US/docs/Glossary/Representation_header"
+          >representation header</a
+        >
+        will say so. Compressing the response is recommended but not required.
+      </p>
+
+      <p>
+        The log block specifies what should happen to access logs. (The access
+        logs are different to the Caddy runtime logs, which are accessed through
+        systemd, meaning
+        <code>systemctl status caddy</code>.) In this case, the access logs will
+        be saved to a file. Caddy creates its own log folder at
+        <code>/var/log/caddy</code> and ensures the caddy user owns the
+        directory, so I've found it simplest to put the access logs there. Caddy
+        will use its
+        <a href="https://caddyserver.com/docs/caddyfile/directives/log#file"
+          >defaults for log rotation</a
+        >.
+      </p>
+
+      <p>
+        The header block specifies the Cache-Control, a.k.a. the header that
+        tells browsers how long they should cache resources. Caddy usually
+        passes through the Cache-Control header from the upstream server, which
+        might be something like Gunicorn or uWSGI if you have a Python web
+        application. But in this case there's no upstream server and no default
+        Cache-Control. If you're minimising and versioning assets like CSS (e.g.
+        with a hash in the file name), you might prefer to vary the
+        Cache-Control so those files are cached forever. The Caddy docs have
+        <a
+          href="https://caddyserver.com/docs/caddyfile/directives/header#examples"
+          >a few examples</a
+        >
+        of this. Setting the Cache-Control is recommended but not essential.
+      </p>
+
+      <h2 id="use-the-new-caddyfile">Use the new Caddyfile</h2>
+
+      <p>
+        When your Caddyfile is ready, use
+        <code>systemctl reload caddy</code> to tell Caddy to use the new
+        version. Your static site should appear at
+        <code>http://server.ip.address</code>
+      </p>
+      <p>
+        (It's the server's IP address because no domain was specified and it's
+        http:// because there's no certificate yet.)
+      </p>
+
+      <h2 id="it-isnt-working">It isn't working...</h2>
+
+      <p>This doesn't always work. Some tips for debugging:</p>
+
+      <ol>
+        <li>
+          Check Caddy's runtime logs using <code>systemctl status caddy</code>
+          <ul>
+            <li>
+              In the summary at the top, is Caddy "active (running)"? If it
+              isn't, systemd isn't running Caddy. Perhaps you restarted the
+              server and didn't have Caddy set to "enabled" (auto-restarting).
+              If that's the case, try <code>systemctl start caddy</code>. If
+              that isn't the problem, you'll need to restart Caddy and carefully
+              read the information that systemd provides (e.g. about why it
+              can't run Caddy), then do some Googling.
+            </li>
+            <li>
+              Are there any runtime logs with "level": "error"? If yes, Caddy is
+              running but has some internal error. Most often I've found the
+              Caddyfile is invalid. Careful reading of the error messages
+              usually reveals the reason.
+            </li>
+          </ul>
+        </li>
+        <li>
+          Can you access the static site from the server itself?
+          <ul>
+            <li>
+              On the server, try
+              <code>curl localhost</code>
+              (or equivalent using something like wget). Do you get the expected
+              response? If that works but you can't access the site in your
+              browser, it suggests that Caddy it serving the files but they
+              can't be seen outside the server. That suggests a firewall error.
+            </li>
+            <li>
+              Do you have <code>ufw</code> running? (Check using
+              <code>ufw status</code>.)
+            </li>
+            <li>
+              Does your cloud provider have a firewall whose settings must be
+              changed via the web interface?
+            </li>
+          </ul>
+        </li>
+      </ol>
+
+      <h2 id="edit-caddyfile-to-serve-via-https-on-your-domain">
+        Edit Caddyfile to serve via HTTPS on your domain
+      </h2>
+
+      <p>
+        If you can see your site in the browser, it's time to serve the site via
+        HTTPS on your domain.
+      </p>
+
+      <p>
+        In your domain name provider's web interface, you'll need to set up the
+        DNS A record and possibly other records. (If you aren't sure what that
+        means, don't worry. It's what tells the world that a particular domain
+        points to a particular IP address. The ins and outs are beyond the scope
+        of this how to, but your domain name provider probably has simple
+        instructions for setting up your DNS records.)
+      </p>
+
+      <p>
+        Once the DNS records are setup, edit the Caddyfile to use the domain
+        name rather than port 80.
+      </p>
+
+      <p>The diff will look something like this:</p>
+
+      <pre><code class="language-diff">
+- :80 {
++ mydomain.com {
+    root * /var/www/my-static-site
+    encode gzip
+    file_server {
+        hide .git
+    }
+
+    log {
+        output file /var/log/caddy/my-static-site.log
+    }
+
+    header {
+        ?Cache-Control "max-age=1800"
+    }
+}
+</code></pre>
+
+      <p>Only the start of the block has changed.</p>
+
+      <p>
+        In this example, the site address is <code>https://mydomain.com</code>.
+        If you've decided to use the www subdomain, the diff should instead
+        begin:
+      </p>
+
+      <pre><code class="language-diff">
+- :80 {
++ www.mydomain.com {
+</code></pre>
+
+      <p>
+        Tell Caddy to use the new version of the file by running
+        <code>systemctl reload caddy</code>.
+      </p>
+
+      <p>
+        Wait a few moments and check the runtime logs using
+        <code>systemctl status caddy</code>. Hopefully you'll see messages about
+        Caddy sucessfully getting a TLS certificate.
+      </p>
+
+      <p>
+        Check you can access https://mydomain.com from a web browser, replacing
+        "mydomain" with your own domain.
+      </p>
+
+      <h2 id="it-isnt-working-round-2">It isn't working... (round 2)</h2>
+
+      <p>
+        Hopefully you tested everything earlier via HTTP and everything now
+        works via HTTPS.
+      </p>
+
+      <p>
+        If the HTTP version was fine but the HTTPS version isn't working, the
+        most likely culprit is a failed ACME challenge. Check the runtime logs
+        using
+        <code>systemctl status caddy</code>.
+      </p>
+
+      <p>
+        If the logs confirm the challenge failed, check your DNS records and the
+        server firewall. In particular, are you allowing traffic on port 443,
+        the standard port for HTTPS traffic?
+      </p>
+
+      <p>
+        It's also worth re-reading the first
+        <a href="#it-isnt-working">It isn't working...</a> section and going
+        through those debugging steps again.
+      </p>
+
+      <p>
+        These are by far the most common problems that I've encountered using
+        Caddy, so hopefully your static site will be up and running in no time.
+      </p>
+
+      <h2 id="tldr">TLDR</h2>
+
+      <p>
+        The TLDR feels redundant on this one because the entire Caddyfile was
+        included several times in the article. But here it is anyway.
+      </p>
+
+      <pre><code class="language-text">
+# /etc/caddy/Caddyfile
+
+mydomain.com {
+    root * /var/www/my-static-site
+    encode gzip
+    file_server {
+        hide .git
+    }
+
+    log {
+        output file /var/log/caddy/my-static-site.log
+    }
+
+    header {
+        ?Cache-Control "max-age=1800"
+    }
+}
+</code></pre>
+
+      <p>
+        Use the command <code>systemctl reload caddy</code> to tell Caddy to use
+        the new version of the Caddyfile.
+      </p>
+
+      <h2 id="useful-things">Useful things</h2>
+
+      <ul>
+        <li>
+          Many pages in the Caddy docs have an "Examples" section at the end.
+          Many examples show common patterns and give an idea of how people use
+          a particular feature.
+        </li>
+        <li>
+          If you're considering a content delivery network (CDN) but don't have
+          a favourite, TechRadar has a useful
+          <a href="https://www.techradar.com/uk/news/best-cdn-providers"
+            >writeup about CDN providers</a
+          >. Some CDN providers have a generous free tier.
+        </li>
+        <li>
+          This link was in the main article, but Jack Wallen's short
+          <a
+            href="https://linuxfoundation.org/blog/classic-sysadmin-understanding-linux-file-permissions/"
+            >overview of Linux file permissions</a
+          >
+          is unusually good, so I'm including it again.
+        </li>
+      </ul>
+    </main>
+
+    <footer>&copy; Ellen Potter</footer>
+
+    <script src="js/prism.js"></script>
+  </body>
+</html>

@@ -6,6 +6,11 @@
         <description>Notes on software development.</description>
         <language>en-gb</language>
         <item>
+            <title>How to serve a static site using Caddy</title>
+            <link>https://ellen.dev/serve-static-site-using-caddy.html</link>
+            <pubDate>Wed, 15 June 2022 17:45:00 GMT</pubDate>
+        </item>
+        <item>
             <title>Exploring browser history using Python's sqlite3 module (plus: finding the database with proc or lsof)</title>
             <link>https://ellen.dev/exploring-browser-history.html</link>
             <pubDate>Wed, 25 May 2022 16:00:00 GMT</pubDate>

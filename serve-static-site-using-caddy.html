@@ -73,14 +73,19 @@
       </p>
 
       <p>
-        When I started using Caddy I found the documentation a bit hit and miss.
-        Some of it's great, but after reading the docs I didn't always
-        understand how simple things fit together. When setting up my first
-        Caddy server, I also realised that I'd become used to automated
-        deployments and was surprised by simple things like "Where should the
-        files go on the server??" The how to covers a few of those topics as
-        well.
+        When I started using Caddy, I read all the introductory documentation,
+        including the quick start guides about Caddyfiles and serving static
+        files. But I still didn't understand how simple things fit together and
+        it took a while to work out how to serve a static site.
       </p>
+
+      <p>
+        I'd also become used to automated deployments and was surprised by
+        simple things like "Where should the files go on the server??" The how
+        to covers a few of those topics as well.
+      </p>
+
+      <p>As ever, skip to the <a href="#tldr">TLDR</a> if you just want the Caddyfile.</p>
 
       <h2 id="install-caddy-on-server">Install Caddy on server</h2>
 
@@ -158,8 +163,8 @@ static-site/
         <code>/var/www</code>, e.g. <code>/var/www/my-static-site</code>. It
         seems to be a common location, so there's a decent chance it will be
         familiar to other developers. Log files often go into the nearby
-        <code>/var/log</code> (discussed in a moment), which keeps everything
-        close together in the directory structure.
+        <code>/var/log</code> (explained later), which keeps everything close
+        together in the directory structure.
       </p>
 
       <p>
@@ -204,14 +209,18 @@ static-site/
 
       <p>
         So for a brand new Caddyfile I tend to check that everything works over
-        HTTP. When I'm confident in the basic setup, I move to HTTPS. An
-        alternative approach is to use a certificate authority's
+        HTTP. When I'm confident in the basic setup, I move to HTTPS.
+      </p>
+
+      <p>
+        An alternative approach is to use a certificate authority's
         <a href="https://caddyserver.com/docs/automatic-https#testing"
           >staging URL</a
         >
-        for ACME challenges. It's worth considering for more complex sites,
-        espeially if you might send or receive sensitive data during the initial
-        setup.
+        while you're getting ready. Then swap to the certificate authority's
+        main URL when going into production. It's worth considering for more
+        complex sites, espeially if you might send or receive sensitive data
+        during the initial setup.
       </p>
 
       <h2 id="write-a-simple-caddyfile">Write a simple Caddyfile</h2>
@@ -228,7 +237,7 @@ static-site/
       </p>
 
       <p>
-        This particular Caddyfile serves the static site via port 80 (HTTP, not
+        This particular Caddyfile serves a static site via port 80 (HTTP, not
         HTTPS).
       </p>
 
@@ -265,14 +274,14 @@ static-site/
       <p>
         In this case, Caddy is told to act as a file server, returning files
         from the directory <code>/var/www/my-static-site</code>. Caddy will
-        return the index.html when someone goes to your root url. (The user
-        doesn't have to include index.html at the end of the url.)
+        return the index.html when someone goes to your root URL. (The user
+        doesn't have to include index.html at the end of the URL.)
       </p>
 
       <p>
-        The line inside the
-        <code>file_server</code> block says that the <code>.git</code> directory
-        shouldn't be served, so a user shouldn't be able to navigate to
+        Inside the <code>file_server</code> block is a line that says Caddy
+        should hide the <code>.git</code> directory. In other words, Caddy
+        shouldn't serve those files and users shouldn't be able to navigate to
         <code>https://example.com/.git</code>
       </p>
 
@@ -487,6 +496,8 @@ static-site/
         The TLDR feels redundant on this one because the entire Caddyfile was
         included several times in the article. But here it is anyway.
       </p>
+
+      <p>Edit the default Caddyfile, which is <code>/etc/caddy/Caddyfile</code></p>
 
       <pre><code class="language-text">
 # /etc/caddy/Caddyfile

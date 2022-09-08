@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>
+      Protohackers: Tips for getting started
+    </title>
+    <meta name="author" content="Ellen Potter" />
+
+    <link rel="stylesheet" href="css/styles.min.css" />
+    <link rel="canonical" href="https://ellen.dev/protohackers-tips.html" />
+  </head>
+
+  <body>
+    <nav class="row">
+      <div class="nav-section">
+        <div class="nav-item"><a href="index.html">Home</a></div>
+        <div class="nav-item">
+          <a type="application/rss+xml" href="feed.xml">RSS</a>
+        </div>
+      </div>
+      <div class="nav-item"><a href="about.html">About</a></div>
+    </nav>
+
+    <main>
+      <h1 id="protohackers-tips-for-getting-started">
+        Protohackers: Tips for getting started
+      </h1>
+      <ul>
+        <li><a href="#using-python">Using Python</a></li>
+        <li>
+          <a href="#hosting">Hosting</a>
+        </li>
+        <li><a href="#debugging">Debugging</a></li>
+        <li><a href="#bits-and-pieces">Bits and pieces</a></li>
+        <li><a href="#useful-things">Useful things</a></li>
+      </ul>
+
+      <p>
+        <a href="https://protohackers.com/">Protohackers</a> is a new "casual
+        programming challenge in which you create servers for network protocols"
+        created by (fellow Brit) James Stanley.
+      </p>
+
+      <p>
+        Before starting the first challenge (0: Smoke Test) I had no clue what I
+        was doing, but it sounded like fun. I figured it wouldn't be too
+        difficult if I wrote the server in Python, which largely proved to be
+        true. But I also hit a few walls and needed some "new to me" debugging
+        techniques.
+      </p>
+
+      <p>
+        With that in mind, I decided to do a small write up for people who are
+        feeling overwhelmed or stuck. I'll avoid substantial spoilers or code,
+        but will talk a little about problems I encountered.
+      </p>
+
+      <h2 id="using-python">Using Python</h2>
+
+      <p>
+        Python has (at least) 3 modules for working with sockets. There's the
+        <a href="https://docs.python.org/3/library/socket.html">socket</a>
+        module,
+        <a href="https://docs.python.org/3/library/socketserver.html"
+          >socketserver</a
+        >
+        and chunks of
+        <a href="https://docs.python.org/3/library/asyncio-stream.html"
+          >asyncio</a
+        >. That means there's a lot of documentation and it can be tricky to
+        look things up because people do things in lots of different ways.
+      </p>
+
+      <p>
+        asyncio is all about concurrency, which is good for web servers. But
+        asyncio streams introduce a lot of abstraction and new concepts, meaning
+        they're less useful if you want to learn about networking.
+      </p>
+
+      <p>
+        socketserver "simplifies the task of writing network servers", to quote
+        the docs. Useful in production code but, again, less useful if you want
+        to learn about networking.
+      </p>
+
+      <p>
+        socket is what serversocket is built on. It's much closer to the C and
+        Linux socket APIs and means you have to do more work to get a working
+        server. But this is Python, so "more work" means creating a basic server
+        takes 10-15 lines of code.
+      </p>
+
+      <h2 id="hosting">Hosting</h2>
+
+      <p>
+        Your server has to be publicly accessible so the Protohackers testing
+        system can send requests and see if the server passes the tests.
+      </p>
+
+      <p>
+        I ran my server as a normal Python script, e.g.
+        <code>python 0_smoke_test.py</code> and stopped the program when the
+        tests were finished. It doesn't need a fancy setup.
+      </p>
+
+      <p>For some people, the sticking point will be the hosting itself.</p>
+
+      <p>
+        You can host your server at home. My knowledge of networking is almost
+        0, so I didn't feel like opening a port on my home router!
+      </p>
+
+      <p>
+        For cloud hosting, the cheapest option is probably Google Cloud
+        Platform, which provides an "always free" e2-micro virtual machine.
+        Smaller companies like Hetzner charge pennies per hour.
+      </p>
+
+      <p>
+        If you've never run a virtual machine in the cloud before, Protohackers
+        is a good way to start. You don't have to get a complex production
+        environment running; all you need is an operating system and appropriate
+        version of Python.
+      </p>
+
+      <p>
+        Cloud providers generally have standard "images" of operating systems
+        like Ubuntu and Fedora and let you pick which OS runs on your virtual
+        machine. Even better, recent versions of Ubuntu, Fedora and so on
+        usually have recent versions of Python.
+      </p>
+
+      <h3 id="firewalls">Firewalls</h3>
+
+      <p>
+        Making your server accessible from the outside world usually means
+        configuring a firewall.
+      </p>
+
+      <p>
+        I was using
+        <a href="https://wiki.ubuntu.com/UncomplicatedFirewall">ufw</a> as a
+        firewall and added a rule to unblock the port where the "smoke test"
+        server was running. Bizarrely, Protohackers still couldn't access it.
+        I'd forgotten that Hetzner has a separate firewall controlled through
+        the account page, so connections were still being refused on the port.
+      </p>
+
+      <h2 id="debugging">Debugging</h2>
+
+      <p>
+        At a few points I had no idea how to start debugging a test failure. The
+        Protohackers tests provide little information about what went wrong and
+        it became obvious that I needed a lot more insight into what was
+        happening.
+      </p>
+
+      <p>
+        It's crucial to be able to send your own requests to your server and see
+        how it responds. I mostly used
+        <a
+          href="https://www.gnu.org/software/inetutils/manual/html_node/telnet-invocation.html"
+          >telnet</a
+        >
+        to send requests. If you aren't familiar with something like telnet, you
+        might find it easier to write a little Python client to send requests.
+      </p>
+
+      <p>
+        To see what messages are getting passed around, the Protohackers "help"
+        page recommended <a href="https://www.tcpdump.org/">tcpdump</a>. Julia
+        Evans's free
+        <a href="https://wizardzines.com/zines/tcpdump/"
+          >Let's learn tcpdump!</a
+        >
+        zine turned out to be exactly what I needed. It explains the basics of
+        the tcpdump output and common flags. I found I just wanted to "listen on
+        all interfaces, listen to a specific port" and to control whether
+        tcpdump printed packet contents or not. (Seeing the packet content is
+        sometimes useful, sometimes overwhelming.)
+      </p>
+
+      <p>
+        It's also useful to have logging (or prints) in the server itself. One
+        "Aha!" moment came when I realised that a particular request appeared in
+        the tcpdump output but not the server logs.
+      </p>
+
+      <h2 id="bits-and-pieces">Bits and pieces</h2>
+
+      <p>
+        Don't worry too much about async or multi-threaded code. You can
+        definitely complete 0: Smoke Test with ordinary, synchronous code. (I
+        know because that's how I wrote my first version.) For 1: Prime Time you
+        might find that a single process struggles to handle the multi-client
+        tests, but you can always switch to a concurrent implementation after
+        the core code is written.
+      </p>
+
+      <p>
+        TCP is a "streaming protocol". This becomes more relevant in 1: Prime
+        Time, where the specification says that each request and each response
+        is "a single line containing a JSON object, terminated by a newline
+        character ('\n', or ASCII 10)". But TCP doesn't guarantee that you'll
+        receive exactly one of those JSON messages at a time. You might only
+        receive a few bytes (just part of the message) or, because the client
+        can reuse the connection, you might receive several messages at once.
+        It's something that your server needs to be able to handle.
+      </p>
+
+      <p>
+        If you're undecided about trying Protohackers: practically everything in
+        this post is something I learned while doing Protohackers challenges 0
+        Smoke Test and 1 Prime Time. (Admittedly I already knew most of the
+        content in the Hosting section.) Protohackers was a really fun way to
+        start learning about networking. Perhaps you'll enjoy it too.
+      </p>
+
+      <h2 id="useful-things">Useful things</h2>
+
+      <ul>
+        <li>
+          Digital Ocean has a good
+          <a
+            href="https://www.digitalocean.com/community/tutorials/ufw-essentials-common-firewall-rules-and-commands"
+            >UFW essentials</a
+          >
+          article
+        </li>
+        <li>
+          Digital Ocean also has a good article about
+          <a
+            href="https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-22-04"
+            >setting up a Ubuntu server</a
+          >
+        </li>
+        <li>
+          The
+          <a href="https://wizardzines.com/zines/tcpdump/"
+            >Let's learn tcpdump!</a
+          >
+          zine by Julia Evans quickly teaches everything you're likely to need
+          to know about tcpdump to play Protohackers
+        </li>
+        <li>
+          <a href="https://overthewire.org/wargames/">Over the Wire</a>
+          (specifically the Bandit game) is a fun way to learn Linux commands
+          like ssh and telnet. Other games are about cybersecurity. Here in the
+          UK your ISP might block it as a "hacking website", in which case
+          you'll need to fiddle with the parental controls that some ISPs turn
+          on by default.
+        </li>
+      </ul>
+    </main>
+
+    <footer>&copy; Ellen Potter</footer>
+  </body>
+</html>

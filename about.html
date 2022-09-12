@@ -1,35 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>About</title>
+    <meta name="author" content="Ellen Potter" />
 
-  <title>About</title>
-  <meta name="author" content="Ellen Potter" />
+    <link rel="stylesheet" href="css/styles.min.css" />
+    <link rel="canonical" href="https://ellen.dev/about.html" />
+  </head>
 
-  <link rel="stylesheet" href="css/styles.min.css" />
-  <link rel="canonical" href="https://ellen.dev/about.html" />
-</head>
+  <body>
+    <nav class="row">
+      <div class="nav-section">
+        <div class="nav-item"><a href="index.html">Home</a></div>
+        <div class="nav-item">
+          <a type="application/rss+xml" href="feed.xml">RSS</a>
+        </div>
+      </div>
+      <div class="nav-item"><a href="about.html">About</a></div>
+    </nav>
+    <main>
+      <section>
+        <h1>About</h1>
+        <p>
+          Hi, I'm Ellen, a software developer in Cambridge, England. I used to
+          be a historian.
+        </p>
+        <p>
+          Occassionally I write up things I've been working on or thinking about
+          or want to remember. Usually there's code.
+        </p>
+        <p>
+          The blog's theme varies according to the user agent's
+          <a
+            href="https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme"
+            >prefers-color-scheme</a
+          >
+          setting. Pages with example code use
+          <a href="https://prismjs.com">PrismJS</a> for syntax highlighting. If
+          JavaScript is blocked, default CSS tries to provide a graceful
+          fallback.
+        </p>
+      </section>
 
-<body>
-  <nav class="row">
-    <div class="nav-section">
-      <div class="nav-item"><a href="index.html">Home</a></div>
-      <div class="nav-item"><a type="application/rss+xml" href="feed.xml">RSS</a></div>
-    </div>
-    <div class="nav-item"><a href="about.html">About</a></div>
-  </nav>
-  <main>
-    <h1>About</h1>
-    <p>Hi, I'm Ellen, a software developer in Cambridge, England. I used to be a historian.</p>
-    <p>This blog is where I write up things I've been working on or thinking about. Usually there's code.</p>
-    <p>The blog's theme varies according to the user agent's <a
-        href="https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme">prefers-color-scheme</a>
-      setting. Pages with example code use <a href="https://prismjs.com">PrismJS</a> for syntax highlighting. If JavaScript is
-      blocked, default CSS tries to provide a graceful fallback.</p>
-  </main>
+      <section>
+        <h2>A few side projects</h2>
+        <ul>
+          <li>
+            <a href="https://github.com/ellen364/poetry-scaffold-plugin"
+              >poetry-scaffold-plugin</a
+            >
+            installs and configures some common Python dev dependencies, which I
+            got tired of setting up for each project.
+          </li>
+          <li>
+            <a href="https://github.com/ellen364/Django-Hospital"
+              >Django Hospital</a
+            >
+            is a way to practice writing Django queries. I wrote it a few years
+            ago to help some junior developers learn about the Django ORM.
+            Occassionally I upgrade the dependencies.
+          </li>
+        </ul>
+      </section>
 
-</body>
-
+      <section>
+        <p>Email: blog at this domain</p>
+      </section>
+    </main>
+  </body>
 </html>

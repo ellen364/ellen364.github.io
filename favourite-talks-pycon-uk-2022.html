@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>
+      Favourite talks at PyCon UK 2022
+    </title>
+    <meta name="author" content="Ellen Potter" />
+
+    <link rel="stylesheet" href="css/styles.min.css" />
+    <link
+      rel="canonical"
+      href="https://ellen.dev/favourite-talks-pycon-uk-2022.html"
+    />
+  </head>
+
+  <body>
+    <nav class="row">
+      <div class="nav-section">
+        <div class="nav-item"><a href="index.html">Home</a></div>
+        <div class="nav-item">
+          <a type="application/rss+xml" href="feed.xml">RSS</a>
+        </div>
+      </div>
+      <div class="nav-item"><a href="about.html">About</a></div>
+    </nav>
+
+    <main>
+      <h1 id="favourite-talks-at-pycon-uk-2022">
+        Favourite talks at PyCon UK 2022
+      </h1>
+      <ul>
+        <li>
+          <a
+            href="#its-your-callable-a-tour-of-pythons-callable-function-interface"
+            >It's your callable: a tour of Python's callable function
+            interface</a
+          >
+        </li>
+        <li>
+          <a href="#breaking-numbers-in-the-name-of-security"
+            >Breaking numbers in the name of security</a
+          >
+        </li>
+        <li>
+          <a href="#how-to-walk-in-a-straight-line"
+            >How to walk in a straight line</a
+          >
+        </li>
+        <li>
+          <a href="#alternative-history-retrocomputing"
+            >Alternative history retrocomputing</a
+          >
+        </li>
+        <li>
+          <a href="#pointers-in-my-python-its-more-likely-than-you-think"
+            >Pointers? In my Python? It's more likely than you think</a
+          >
+        </li>
+        <li><a href="#my-pycon-photos">My PyCon photos</a></li>
+        <li><a href="#useful-things">Useful things</a></li>
+      </ul>
+
+      <p>
+        PyCon UK 2022 was held in Cardiff City Hall after a 3 year break due to
+        covid. It was my first time attending PyCon UK or any Python conference.
+        I'm told there were fewer talks than usual, but I still didn't see
+        anywhere near all of them!
+      </p>
+
+      <p>
+        Here are a few that I particularly enjoyed, in the order they were
+        given.
+      </p>
+
+      <h2 id="its-your-callable-a-tour-of-pythons-callable-function-interface">
+        It's your callable: a tour of Python's callable function interface
+      </h2>
+
+      <p>
+        Talk by Dom Weldon.
+        <a href="https://www.youtube.com/watch?v=a63rn66Hu74"
+          >Video on YouTube</a
+        >.
+      </p>
+
+      <p>
+        Dom gave an enjoyable summary of callable behaviour, with a focus on
+        reading and modifying a callable's metadata.
+      </p>
+
+      <p>
+        Covers some subtleties of Python scope, e.g. when to use the
+        <code>nonlocal</code> keyword, which will be useful to people coming to
+        Python from other languages.
+      </p>
+
+      <h2 id="breaking-numbers-in-the-name-of-security">
+        Breaking numbers in the name of security
+      </h2>
+
+      <p>
+        Lightning talk by Steve Dower.
+        <a href="https://youtu.be/bDo0FKmosnA?t=1718">Video on YouTube</a>.
+      </p>
+
+      <p>
+        Steve explained the recently patched CVE-2020-10735, which affected code
+        like <code>int(user_input)</code>. It's worth noting that since the
+        patch, <code>int</code> throws a ValueError when the input is too big.
+      </p>
+
+      <p>
+        This is the first short / lightning talk I've seen about a CVE. It's a
+        great idea, and a short talk seem like a good format for it. Hopefully
+        others will follow suit.
+      </p>
+
+      <h2 id="how-to-walk-in-a-straight-line">
+        How to walk in a straight line
+      </h2>
+
+      <p>
+        Lightning talk by Alastair Stanley.
+        <a href="https://youtu.be/FFZHt_BPXXE?t=591">Video on YouTube</a>.
+      </p>
+
+      <p>
+        My summary doesn't do the talk justice, but here it is: Alastair arrived
+        in Cardiff early, used OpenStreetMap data to calculate the straightest
+        walkable line across the city and then tried to walk it.
+      </p>
+
+      <p>
+        This was a really fun talk, not least because I had no idea there's a
+        community of people who try to walk across cities and even countries (!)
+        in the straightest line possible.
+      </p>
+
+      <h2 id="alternative-history-retrocomputing">
+        Alternative history retrocomputing
+      </h2>
+
+      <p>
+        Talk by Peter Russell.
+        <a href="https://www.youtube.com/watch?v=1gIX_-ABHs8"
+          >Video on YouTube</a
+        >.
+      </p>
+
+      <p>
+        A talk about the <a href="https://gigatron.io/">Gigatron</a>, "a TTL
+        microcomputer that you build yourself". Most of this talk went over my
+        head, but it left an impression. I impulse bought a Gigatron printed
+        circuit board (PCB) at the end of the talk and since then have been
+        buying the components.
+      </p>
+
+      <p>
+        Peter also showed off the Gigatron at the Python on Hardware Community
+        Showcase session. Sadly I didn't get a chance to chat to him. If anyone
+        reading this knows Peter, please let him know that he's inspired at
+        least one more Gigatron build!
+      </p>
+
+      <h2 id="pointers-in-my-python-its-more-likely-than-you-think">
+        Pointers? In my Python? It's more likely than you think
+      </h2>
+
+      <p>
+        Talk by Eli Holderness.
+        <a href="https://www.youtube.com/watch?v=ITr3O3sqhVg"
+          >Video on YouTube</a
+        >.
+      </p>
+
+      <p>
+        The start of the talk is a really clear explanation of why changing one
+        list can modify another list and why tuples are sometimes unexpectedly
+        mutable. It's become my go-to recommendation for anyone having trouble
+        with copy behaviour in Python.
+      </p>
+
+      <p>
+        The second part of the talk digs deeper, into the details of reference
+        counting, cyclic references and garbage collection.
+      </p>
+
+      <p>
+        Eli mentioned they're preparing a talk on scope, which I look forward to
+        seeing.
+      </p>
+
+      <h2 id="my-pycon-photos">My PyCon photos</h2>
+
+      <p>
+        Lightning talk by Adam Johnson.
+        <a href="https://youtu.be/NbkD0hNyetg?t=398">Video on YouTube</a>.
+      </p>
+
+      <p>
+        Practically anything I say about this talk will spoil it, so I'll just
+        say it's technology related and well worth 5 minutes of your time.
+      </p>
+
+      <h2 id="useful-things">Useful things</h2>
+
+      <p>
+        These were a few of my favourite talks, but PyCon UK had many other
+        talks and they're worth a watch. The lightning talks were especially
+        varied, with something for practically everyone.
+      </p>
+
+      <p>
+        The conference organisers have helpfully grouped the days into
+        <a href="https://www.youtube.com/c/PyconUKSoc/playlists"
+          >YouTube playlists</a
+        >, so it's easy to look at the
+        <a href="https://pretalx.com/pycon-uk-2022/schedule/"
+          >conference schedule</a
+        >
+        and find a video.
+      </p>
+    </main>
+    <footer>&copy; Ellen Potter</footer>
+  </body>
+</html>

@@ -6,6 +6,11 @@
         <description>Notes on software development.</description>
         <language>en-gb</language>
         <item>
+            <title>Racket pronunciation guide</title>
+            <link>https://ellen.dev/racket-pronunciation-guide.html</link>
+            <pubDate>Thur, 22 Sept 2022 06:30:00 GMT</pubDate>
+        </item>
+        <item>
             <title>Favourite talks at PyCon UK 2022</title>
             <link>https://ellen.dev/favourite-talks-pycon-uk-2022.html</link>
             <pubDate>Wed, 21 Sept 2022 12:00:00 GMT</pubDate>

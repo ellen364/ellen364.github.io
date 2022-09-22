@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>
+      Racket pronunciation guide
+    </title>
+    <meta name="author" content="Ellen Potter" />
+
+    <link rel="stylesheet" href="css/styles.min.css" />
+    <link
+      rel="canonical"
+      href="https://ellen.dev/racket-pronunciation-guide.html"
+    />
+  </head>
+
+  <body>
+    <nav class="row">
+      <div class="nav-section">
+        <div class="nav-item"><a href="index.html">Home</a></div>
+        <div class="nav-item">
+          <a type="application/rss+xml" href="feed.xml">RSS</a>
+        </div>
+      </div>
+      <div class="nav-item"><a href="about.html">About</a></div>
+    </nav>
+
+    <main>
+      <h1 id="racket-pronunciation-guide">Racket pronunciation guide</h1>
+
+      <p>
+        A fun, slightly strange part of learning Racket has been learning the
+        function names.
+      </p>
+
+      <p>
+        These pronunciations are my understanding of how Dan Grossman says them
+        in
+        <a href="https://www.coursera.org/learn/programming-languages-part-b"
+          >Programming Languages Part B</a
+        >
+        on Coursera, so if they're wrong blame Dan.
+      </p>
+
+      <p>
+        (Just kidding. Don't blame Dan. If you're convinced a pronunciation is
+        wrong, let me know using the email address on the
+        <a href="about.html">About</a> page. If you persuade me you're right,
+        I'll update the list.)
+      </p>
+
+      <div class="grid grid--collapse">
+        <div class="emphasis">Function</div>
+        <div class="emphasis">Pronounced</div>
+        <div class="emphasis">Example</div>
+
+        <div>car</div>
+        <div>car</div>
+        <div><code>(car (list 1 2 3)) ; 1</code></div>
+
+        <div>cdr</div>
+        <div>cud-er</div>
+        <div><code>(cdr (list 1 2 3)) ; '(2 3)</code></div>
+
+        <div>cadr</div>
+        <div>cad-er</div>
+        <div><code>(cadr (list 1 2 3)) ; 2</code></div>
+
+        <div>caddr</div>
+        <div>ca-did-er</div>
+        <div><code>(caddr (list 1 2 3)) ; 3</code></div>
+
+        <div>set!</div>
+        <div>set-bang</div>
+        <div><code>(set! x 10)</code></div>
+
+        <div>set-mcar!</div>
+        <div>set-em-car-bang</div>
+        <div><code>(set-mcar! p 10)</code></div>
+
+        <div>set-mcdr!</div>
+        <div>set-em-cud-er-bang</div>
+        <div><code>(set-mcdr! p 20)</code></div>
+      </div>
+
+      <p>
+        There are many, many
+        <a
+          href="https://docs.racket-lang.org/reference/pairs.html#%28part._.Pair_.Accessor_.Shorthands%29"
+          >"pair accessor shorthands"</a
+        >
+        in Racket, but I have no idea how to pronounce most of them!
+      </p>
+    </main>
+
+    <footer>&copy; Ellen Potter</footer>
+  </body>
+</html>

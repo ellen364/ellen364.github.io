@@ -107,6 +107,9 @@ h6 {
   margin-block-start: 1.4em;
   margin-block-end: 0.7em;
 }
+.emphasis {
+  font-weight: 700;
+}
 
 /* Code
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -148,4 +151,28 @@ nav {
 .nav-item a:focus {
   text-decoration: none;
   outline: 1px solid var(--links);
+}
+
+/* Grid
+–––––––––––––––––––––––––––––––––––––––––––––––––– */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 1rem;
+  width: 75%;
+  margin: 2rem 0rem;
+}
+@media (max-width: 1000px) {
+  .grid {
+    width: 100%;
+  }
+}
+@media (max-width: 600px) {
+  .grid--collapse {
+    display: inline-grid;
+    grid-template-columns: 1fr;
+  }
+  .grid--collapse div:nth-child(3n+4) {
+    margin-top: 1.5rem;
+  }
 }

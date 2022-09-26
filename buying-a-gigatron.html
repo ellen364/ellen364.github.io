@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>
+      Buying a Gigatron
+    </title>
+    <meta name="author" content="Ellen Potter" />
+
+    <link rel="stylesheet" href="css/styles.min.css" />
+    <link rel="canonical" href="https://ellen.dev/buying-a-gigatron.html" />
+  </head>
+
+  <body>
+    <nav class="row">
+      <div class="nav-section">
+        <div class="nav-item"><a href="index.html">Home</a></div>
+        <div class="nav-item">
+          <a type="application/rss+xml" href="feed.xml">RSS</a>
+        </div>
+      </div>
+      <div class="nav-item"><a href="about.html">About</a></div>
+    </nav>
+
+    <main>
+      <h1 id="buying-a-gigatron">Buying a Gigatron</h1>
+
+      <p>
+        At PyCon UK 2022, Peter Russell
+        <a href="https://www.youtube.com/watch?v=1gIX_-ABHs8">gave a talk</a> on
+        the <a href="https://gigatron.io/">Gigatron</a> "a minimalistic retro
+        computer" that you make yourself. By the end of Peter's talk, I'd found
+        an eBay listing for a Gigatron printed circuit board (PCB). A few
+        minutes after the talk, I'd bought the PCB.
+      </p>
+
+      <p>
+        Considering how little I know about computer architecture or
+        electronics, not to mention the very little soldering experience, it
+        wasn't the wisest decision I've ever made. But after getting home from
+        PyCon, I figured I might as well follow through and started working out
+        how to buy the other parts.
+      </p>
+
+      <figure>
+        <img
+          class="w-full"
+          srcset="
+            img/soldering-experience-600w.jpg   600w,
+            img/soldering-experience-1500w.jpg 1500w,
+            img/soldering-experience-3000w.jpg 3000w
+          "
+          sizes="70vw"
+          alt="A solder it yourself torch from SparkFun and a Pimoroni Unicorn HAT for Raspberry Pi."
+        />
+        <figcaption>
+          Previous soldering experience. Looking at the solder joints on the
+          Unicorn HAT, it's a miracle that it works.
+        </figcaption>
+      </figure>
+
+      <p>
+        The inventors of the Gigatron, Marcel van Kervinck and Walter Belgers,
+        used to sell Gigatron kits. These days it's a DIY affair. (A few
+        companies do sell Gigatron kits but not in the UK. The kit prices are
+        high enough that they seem likely to fall foul of import duty, VAT and
+        the associated delivery fees.)
+      </p>
+
+      <p>
+        Luckily the Gigatron website has a detailed assembly guide and a bill of
+        materials. Even more usefully, the bill of materials has links to the
+        components on various electronics websites, including Mouser, DigiKey
+        and Farnell. Mouser seemed to have the best reviews and promised to
+        handle things like UK VAT, avoiding nasty delivery fee surprises, so I
+        went with them.
+      </p>
+
+      <p>
+        Putting together a basket of 37 components veered wildly between
+        straightforward and confusing. Some items had lead times of a year or
+        more and I wasn't patient enough to wait that long. The ERPOM (erasable
+        programmable read-only memory), the microcontroller for the PS/2
+        keyboard adapter, zener diodes, and several of the simpler chips seemed
+        to be in very short supply.
+      </p>
+
+      <p>
+        Swapping out parts meant a lot of Googling, trying to work out the
+        difference between a CD74HCT244E, a SN74HCT244NE4 and a SN74HCT244N. The
+        most important part seemed to generally be in the middle, e.g. 74HCT244,
+        with other letters being manufacturer codes.
+      </p>
+
+      <p>
+        Nearly all the chips in the Gigatron are 74HCT, which I learned is a
+        specific "logic family". The most important thing for me was that chips
+        with that code are compatible with each other, for example they expect
+        the same power supply. There are closely related chips, like the 74HC or
+        74LS, that seem to be compatible if you fiddle a bit with the circuit. I
+        was absolutely not going to do that and stuck to the 74HCT chips.
+      </p>
+
+      <p>
+        For the items with long lead times, like the EPROM and the ATtiny85
+        microcontroller, I went to eBay. eBay had the components, or seemingly
+        compatible ones, but the listings seemed expensive. (Surely a 1MB EPROM
+        didn't cost £6 before the electronics shortage happened??) But in for a
+        penny, in for a pound. (Too many pounds...) The information in the
+        Gigatron bill of materials was fantastic again and I managed to find
+        components. Hopefully I got something workable.
+      </p>
+
+      <p>
+        There are still a few things on the shopping list, not least the
+        famicom-style controller and a box to hold the Gigatron. But with small
+        and large parcels falling through my post box most days, ordering those
+        can wait a while.
+      </p>
+
+      <figure>
+        <img
+          class="w-full"
+          srcset="
+            img/gigatron-parts-delivery-3300w.jpg 3300w,
+            img/gigatron-parts-delivery-1500w.jpg 1500w,
+            img/gigatron-parts-delivery-600w.jpg   600w
+          "
+          sizes="70vw"
+          alt="A cardboard box containing bags of electronics."
+        />
+        <figcaption>
+          Most of the parts for the Gigatron. The box is 41cm x 36cm x 10cm.
+          Buying 1 or 2 of each part meant an incredible amount of packaging.
+        </figcaption>
+      </figure>
+    </main>
+
+    <footer>&copy; Ellen Potter</footer>
+  </body>
+</html>

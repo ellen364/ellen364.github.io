@@ -89,6 +89,9 @@ footer {
   display: flex;
   flex: 50%;
 }
+.w-full {
+  width: 100%;
+}
 
 /* Typography
 –––––––––––––––––––––––––––––––––––––––––––––––––– */

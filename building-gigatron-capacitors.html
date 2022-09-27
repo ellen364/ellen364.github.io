@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>
+      Building a Gigatron: Capacitors
+    </title>
+    <meta name="author" content="Ellen Potter" />
+
+    <link rel="stylesheet" href="css/styles.min.css" />
+    <link
+      rel="canonical"
+      href="https://ellen.dev/building-gigatron-capacitors.html"
+    />
+  </head>
+
+  <body>
+    <nav class="row">
+      <div class="nav-section">
+        <div class="nav-item"><a href="index.html">Home</a></div>
+        <div class="nav-item">
+          <a type="application/rss+xml" href="feed.xml">RSS</a>
+        </div>
+      </div>
+      <div class="nav-item"><a href="about.html">About</a></div>
+    </nav>
+
+    <main>
+      <h1 id="building-a-gigatron-capacitors">
+        Building a Gigatron: Capacitors
+      </h1>
+
+      <p>
+        Previous post: <a href="buying-a-gigatron.html">Buying a Gigatron</a>
+      </p>
+
+      <p>
+        Enough parts have arrived to start building the Gigatron. The assembly
+        guide suggests the build takes 3 or 4 hours. Given my lack of
+        experience, I suspect it will take longer. (Possibly much longer.) The
+        plan is to space out the build, doing 1 or 2 steps at a time. That will
+        allow some time for reading at each step, learning a little about what
+        I've just added to the Gigatron.
+      </p>
+
+      <p>Onto step 1.</p>
+
+      <blockquote cite="https://gigatron.io/media/Gigatron-manual.pdf">
+        <p>
+          To practice with soldering, we start by soldering 40 ceramic 100nF
+          capacitors, marked C5 through C44.
+        </p>
+        <p>- <cite>Gigatron Assembly Guide</cite>, p. 30</p>
+      </blockquote>
+
+      <p>
+        40 ceramic capacitors, each with 2 pins, sounded like a lot of soldering
+        but I definitely needed the practice.
+      </p>
+
+      <p>
+        On the PCB the capacitors are arranged in a roughly clockwise pattern,
+        which is a tiny but lovely detail. The arrangement makes it easier to
+        move from C5 to C6, for example, and be confident that none of the
+        locations have been missed. Marcel van Kervinck and Walter Belgers
+        clearly put a lot of care and thought into creating the Gigatron.
+      </p>
+
+      <p>
+        Soldering felt very slow at first. I was out of practice - and didn't
+        have much in the first place - so everything felt unfamiliar. After a
+        while it became oddly meditative. Half listening to something on the
+        radio while soldering felt much more relaxing than half listening to
+        music while coding.
+      </p>
+
+      <p>
+        Not having a good inside location for soldering, I've been doing it
+        outside. There's an exterior power plug, so it's convenient, and the
+        ventilation is good. The downside is the weather. After soldering about
+        20 capacitors, it started raining. Quickly grabbing things while getting
+        rained on and trying to avoid a hot soldering iron wasn't fun.
+      </p>
+
+      <p>
+        After everything dried a bit, soldering resumed and I managed to finish
+        the 40 capacitors. Some fiddling with the multimeter ensued as I worked
+        out how to test for the "infinte resistance" the guide says the circuit
+        should have at this point. It seems good and the soldering looks much
+        better than my previous attempts, so hopefully it all works.
+      </p>
+
+      <p>
+        Before starting to solder, I'd wondered why on earth I was soldering 40
+        capacitors. Capacitors store energy and seem to be used in circuits for
+        a bunch of different reasons. In the Gigatron, the capacitors are
+        probably there to smooth out the power supply. If the voltage of the
+        power supply drops briefly, capacitors can make up the difference and
+        maintain the correct voltage. It sounds like integrated circuits (ICs),
+        the little black chips that will go into the Gigatron, are sensitive to
+        small changes in voltage, so the capacitors help protect the chips.
+        Those 80 points of soldering to add the capacitors suddenly seem a lot
+        more worthwhile.
+      </p>
+      <figure>
+        <img
+          class="w-full"
+          srcset="
+            img/gigatron-capacitors-700w.jpg   700w,
+            img/gigatron-capacitors-1500w.jpg 1500w,
+            img/gigatron-capacitors-3000w.jpg 3000w
+          "
+          sizes="70vw"
+          alt="A Gigatron printed circuit board with 40 ceramic capacitors soldered onto it."
+        />
+        <figcaption>
+          The Gigatron with its 40 ceramic capacitors. Photographing the shiny PCB proved difficult.
+        </figcaption>
+      </figure>
+    </main>
+
+    <footer>&copy; Ellen Potter</footer>
+  </body>
+</html>

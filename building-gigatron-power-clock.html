@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>
+      Building a Gigatron: Power and clock
+    </title>
+    <meta name="author" content="Ellen Potter" />
+
+    <link rel="stylesheet" href="css/styles.min.css" />
+    <link
+      rel="canonical"
+      href="https://ellen.dev/building-gigatron-power-clock.html"
+    />
+  </head>
+
+  <body>
+    <nav class="row">
+      <div class="nav-section">
+        <div class="nav-item"><a href="index.html">Home</a></div>
+        <div class="nav-item">
+          <a type="application/rss+xml" href="feed.xml">RSS</a>
+        </div>
+      </div>
+      <div class="nav-item"><a href="about.html">About</a></div>
+    </nav>
+
+    <main>
+      <h1 id="building-a-gigatron-power-and-clock">
+        Building a Gigatron: Power and clock
+      </h1>
+
+      <p>
+        Previous post:
+        <a href="building-gigatron-capacitors.html"
+          >Building a Gigatron: Capacitors</a
+        >
+      </p>
+
+      <figure>
+        <img
+          class="w-full"
+          srcset="
+            img/gigatron-power-700w.jpg   700w,
+            img/gigatron-power-1500w.jpg 1500w,
+            img/gigatron-power-3000w.jpg 3000w
+          "
+          sizes="70vw"
+          alt="Gigatron printed circuit board with completed power circuit and red LED lit up."
+        />
+        <figcaption>
+          Gigatron power circuit and prove of life.
+        </figcaption>
+      </figure>
+
+      <p>It's alive!</p>
+
+      <p>
+        There's power coursing through the Gigatron. The power isn't doing a lot
+        right now, but it's there and it is powering a red LED.
+      </p>
+
+      <p>
+        It took two goes to get the power working. I was quite pleased with the
+        first attempt, but it proved a dud. Luckily the fix was absurdly simple
+        - I hadn't soldered the power pins on the USB socket, so power wasn't
+        even leaving the USB.
+      </p>
+
+      <p>
+        Doing the power and clock has been a change from the capacitors.
+        Suddenly there are different components and just finding them in the
+        huge bag of bags took some time. Some of the new components require more
+        care, usually because they're polarised (they have a positive and
+        negative side) and have to be soldered the right way around.
+      </p>
+
+      <p>
+        Along with the now-familiar capacitors, the power circuit has
+      </p>
+
+      <ul>
+        <li>
+          zener diode (black cylinder with silver stripe), which I think
+          protects the Gigatron if there's a power surge.
+        </li>
+        <li>
+          multi-fuse (big orange disk), also known as a resettable fuse. Another
+          component to protect against power surges. "Resettable" seems to mean
+          that it can work (break the circuit) multiple times. That's excellent
+          because the (normal?) fuses in my house have to be replaced if they
+          blow.
+        </li>
+        <li>
+          supervisory circuit (little black thing near LED), which somehow
+          monitors the power supply and maybe does something? The articles I
+          found were either vague or more technical than I understood, so this
+          is pretty mysterious right now.
+        </li>
+      </ul>
+
+      <p>
+        The last bits and pieces of the power circuit are some resistors and the
+        red LED (labelled a "blinkenlight") to prove it's working.
+      </p>
+
+      <p>
+        The clock circuit has even more new components, including an exciting
+        first - the first integrated circuit! The IC is a 74HCT04, which its
+        datasheet says is a "hex inverter". The inverter takes 6 input signals
+        and for each signal produces the opposite output. That's a logical Not,
+        with True becoming False and vice versa, so this is a 6 bit Not gate. I
+        don't currently understand why it's in the clock.
+      </p>
+
+      <figure>
+        <img
+          class="w-full"
+          srcset="
+            img/gigatron-clock-circuit-700w.jpg   700w,
+            img/gigatron-clock-circuit-1500w.jpg 1500w,
+            img/gigatron-clock-circuit-3000w.jpg 3000w
+          "
+          sizes="70vw"
+          alt="Electronic components making up a clock circuit on the Gigatron printed circuit board."
+        />
+        <figcaption>
+          Gigatron clock circuit.
+        </figcaption>
+      </figure>
+
+      <p>
+        The other notable part of the clock is the "crystal", which looks more
+        like a silver lozenge. This seems to be a "crystal oscillator", which
+        has a tiny bit of quartz crystal inside the metal package. I really
+        wanted to open it up and see inside, but had only bought one and had to
+        put the still-whole crystal into the Gigatron instead.
+      </p>
+
+      <p>
+        The crystal is designed have a particular frequency, in this case
+        6.25Mhz. Remarkably, it's this oscillation that provides the clock
+        signal for the Gigatron! According to Wiki, the clock signal
+        <a href="https://en.wikipedia.org/wiki/Clock_signal"
+          >"oscillates between a high and a low state and is used like a
+          metronome to coordinate actions of digital circuits."</a
+        >
+        I had no idea that's how a computer clock signal works and it was a
+        delightful discovery. I was definitely one of today's
+        <a href="https://xkcd.com/1053/">lucky 10,000</a>.
+      </p>
+    </main>
+
+    <footer>&copy; Ellen Potter</footer>
+  </body>
+</html>

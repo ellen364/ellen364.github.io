@@ -6,6 +6,11 @@
         <description>Notes on software development.</description>
         <language>en-gb</language>
         <item>
+            <title>Building a Gigatron: Trials and Tribulations</title>
+            <link>https://ellen.dev/building-gigatron-trials-tribulations.html</link>
+            <pubDate>Tue, 25 Oct 2022 10:30:00 GMT</pubDate>
+        </item>
+        <item>
             <title>Building a Gigatron: Power and clock</title>
             <link>https://ellen.dev/building-gigatron-power-clock.html</link>
             <pubDate>Mon, 3 Oct 2022 14:00:00 GMT</pubDate>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>
+      Today I Learned (TIL) that having a UUID as a database primary key can be
+      a really bad idea
+    </title>
+    <meta name="author" content="Ellen Potter" />
+
+    <link rel="stylesheet" href="css/styles.min.css" />
+    <link
+      rel="canonical"
+      href="https://ellen.dev/til-uuid-primary-keys-bad-idea.html"
+    />
+  </head>
+
+  <body>
+    <nav class="row">
+      <div class="nav-section">
+        <div class="nav-item"><a href="index.html">Home</a></div>
+        <div class="nav-item">
+          <a type="application/rss+xml" href="feed.xml">RSS</a>
+        </div>
+      </div>
+      <div class="nav-item"><a href="about.html">About</a></div>
+    </nav>
+
+    <main>
+      <h1
+        id="today-i-learned-til-that-having-a-uuid-as-a-database-primary-key-can-be-a-really-bad-idea"
+      >
+        Today I Learned (TIL) that having a UUID as a database primary key can
+        be a really bad idea
+      </h1>
+
+      <p>
+        Trying out Simon Willison's idea of
+        <a href="https://til.simonwillison.net/">Today I Learned (TIL)</a> as a
+        way to get back into writing.
+      </p>
+
+      <p>
+        I was vaguely suspicious of UUID primary keys for reasons that I
+        couldn't remember.
+      </p>
+
+      <p>
+        Turns out the reason is that some (many?) row-oriented database engines
+        use a table's primary key to organise the row storage. (An example is
+        <a
+          href="https://dev.mysql.com/doc/refman/8.0/en/primary-key-optimization.html"
+          >InnoDB</a
+        >, which in 2023 is the default database engine for MySQL and MariaDB.)
+        If the primary key is sequential, row order is maintained by adding the
+        new row to the end of a page or, if that's full, creating a new page. If
+        the table storage is organised around a (random) UUID primary key, the
+        new row has to be inserted at whichever position maintains sort order.
+        In the worst case scenario, the new row has to be first and the database
+        moves every existing row to make room for it. Unsurprisingly, insert
+        performance is terrible.
+      </p>
+
+      <p>
+        PostgreSQL is an interesting case: even the primary key is technically a
+        <a
+          href="https://www.postgresql.org/docs/15/indexes-index-only-scans.html"
+          >"secondary index"</a
+        >. Postgres always organises the row storage using an index defined by
+        Postgres itself. The user-defined primary key doesn't affect that, so a
+        UUID primary key is fine.
+      </p>
+    </main>
+
+    <footer>&copy; Ellen Potter</footer>
+  </body>
+</html>

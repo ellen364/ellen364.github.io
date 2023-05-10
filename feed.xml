@@ -6,6 +6,11 @@
         <description>Notes on software development.</description>
         <language>en-gb</language>
         <item>
+            <title>TIL: Having a UUID as a primary key can be a really bad idea</title>
+            <link>https://ellen.dev/til-uuid-primary-keys-bad-idea.html</link>
+            <pubDate>Wed, 10 May 2023 18:55:00 GMT</pubDate>
+        </item>
+        <item>
             <title>Building a Gigatron: Trials and Tribulations</title>
             <link>https://ellen.dev/building-gigatron-trials-tribulations.html</link>
             <pubDate>Tue, 25 Oct 2022 10:30:00 GMT</pubDate>

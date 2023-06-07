@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>
+      TIL: Keyboard navigation should tab between components, but not within
+      them
+    </title>
+    <meta name="author" content="Ellen Potter" />
+
+    <link rel="stylesheet" href="css/styles.min.css" />
+    <link
+      rel="canonical"
+      href="https://ellen.dev/til-tab-between-components-not-within.html"
+    />
+  </head>
+
+  <body>
+    <nav class="row">
+      <div class="nav-section">
+        <div class="nav-item"><a href="index.html">Home</a></div>
+        <div class="nav-item">
+          <a type="application/rss+xml" href="feed.xml">RSS</a>
+        </div>
+      </div>
+      <div class="nav-item"><a href="about.html">About</a></div>
+    </nav>
+
+    <main>
+      <h1
+        id="til-keyboard-navigation-should-tab-between-components-but-not-within-them"
+      >
+        TIL: Keyboard navigation should tab between components, but not within
+        them
+      </h1>
+
+      <p>
+        It's fashionable for input boxes to contain a clickable element, e.g. a
+        search icon or a button to clear the input. I've worked on a couple of
+        projects where it was expected that those elements were part of the tab
+        sequence when using a keyboard to navigate the page. E.g. a tab takes
+        you into the input box, where you can type, then onto the search icon
+        thats nested inside the box, then out of the input box and onto the next
+        element.
+      </p>
+
+      <p>
+        Turns out that's wrong. ARIA says that only 1 part of a "composite UI
+        component" should receive tab focus:
+      </p>
+
+      <blockquote>
+        <p>
+          As described in section Fundamental Keyboard Navigation Conventions,
+          the tab sequence should include only one focusable element of a
+          composite UI component. Once a composite contains focus, keys other
+          than Tab and Shift + Tab enable the user to move focus among its
+          focusable elements.
+        </p>
+      </blockquote>
+
+      <blockquote>
+        <span>- </span>
+        <a
+          href="https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/#keyboardnavigationinsidecomponents"
+          >Developing a Keyboard Interface: Keyboard Navigation Inside
+          Components</a
+        >
+      </blockquote>
+
+      <p>
+        So the other elements (e.g. the search button nested inside a search
+        box) should be navigable via keyboard, but using other keys.
+      </p>
+
+      <p>
+        Now that I've read the guide, the behaviour makes a lot of sense. And it
+        seems standard in more traditional elements -- if you open a dropdown
+        select element, the items are navigated using the up and down arrow
+        keys, not the tab key. A group of radio buttons works similarly.
+      </p>
+
+      <p>
+        I also learned that the awkwardly named ARIA Authoring Practices Guide has a great
+        <a href="https://www.w3.org/WAI/ARIA/apg/patterns/">Patterns</a> section
+        summarising the recommended keyboard behaviour and attributes for
+        different elements (alerts, comboboxs, tab groups and so on). It focuses
+        on the implementation details needed by devs and has gone into my bookmarks.
+      </p>
+    </main>
+
+    <footer>&copy; Ellen Potter</footer>
+  </body>
+</html>

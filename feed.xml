@@ -6,6 +6,11 @@
         <description>Notes on software development.</description>
         <language>en-gb</language>
         <item>
+            <title>TIL: Keyboard navigation should tab between components, but not within</title>
+            <link>https://ellen.dev/til-tab-between-components-not-within.html</link>
+            <pubDate>Wed, 7 June 2023 07:50:00 GMT</pubDate>
+        </item>
+        <item>
             <title>TIL: Having a UUID as a primary key can be a really bad idea</title>
             <link>https://ellen.dev/til-uuid-primary-keys-bad-idea.html</link>
             <pubDate>Wed, 10 May 2023 18:55:00 GMT</pubDate>

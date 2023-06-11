@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>
+      Building a relational database: File structure
+    </title>
+    <meta name="author" content="Ellen Potter" />
+
+    <link rel="stylesheet" href="css/styles.min.css" />
+    <link
+      rel="canonical"
+      href="https://ellen.dev/building-a-relational-database-file-structure.html"
+    />
+  </head>
+
+  <body>
+    <nav class="row">
+      <div class="nav-section">
+        <div class="nav-item"><a href="index.html">Home</a></div>
+        <div class="nav-item">
+          <a type="application/rss+xml" href="feed.xml">RSS</a>
+        </div>
+      </div>
+      <div class="nav-item"><a href="about.html">About</a></div>
+    </nav>
+
+    <main>
+      <h1 id="building-a-relational-database-file-structure">
+        Building a relational database: File structure
+      </h1>
+
+      <ul>
+        <li><a href="#folders-and-files">Folders and files</a></li>
+        <li>
+          <a href="#roughly-how-i-broke-down-the-work"
+            >Roughly how I broke down the work</a
+          >
+        </li>
+        <li>
+          <a href="#useful-things">Useful things</a>
+          <ul>
+            <li><a href="#commands">Commands</a></li>
+            <li><a href="#resources">Resources</a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <p>
+        For around a year I've thought about writing a toy database, but not
+        been sure where to start. Recently a couple of things aligned and I
+        dipped my toes into the water.
+      </p>
+
+      <p>
+        The database that I use most is PostgreSQL and Postgres is well
+        documented, so I'm using it as a rough model. The number of potential
+        features is huge and overwhelming, so I'm thinking in very small steps.
+        However, the database will need at least these things:
+      </p>
+
+      <ul>
+        <li>
+          an SQL parser, which takes a string SQL statement and converts it to a
+          tree
+        </li>
+        <li>
+          a query planner, which takes the tree and works out a plan for
+          fetching or modifying the data
+        </li>
+        <li>a storage engine to persist the data on disk</li>
+      </ul>
+
+      <p>
+        I've started with the storage engine because it took my interest and the
+        first steps seemed surprisingly tractable.
+      </p>
+
+      <h2 id="folders-and-files">Folders and files</h2>
+
+      <p>
+        Postgres running on 1 machine can have many databases. The databases are
+        stored in 1 directory, conventionally called PGDATA. Each database has
+        its own subdirectory and within a database's subdirectory, each table
+        has its own file.
+      </p>
+
+      <pre><code>
+PGDATA/
+├── db1/
+└── db2/
+    ├── tableA
+    └── tableB
+
+</code></pre>
+
+      <p>
+        A table's file is carefully structured. The file is subdivided into 8kb
+        sections, most often referred to as "pages". 8kb is just the norm for
+        Postgres. Other databases have a different, fixed page size or let pages
+        vary in size.
+      </p>
+
+      <p>
+        I don't understand the details yet, but page size relates to the
+        performance of the underlying storage, e.g. your HDD or SSD. The main
+        sticking point seems to be that the physical storage doesn't read 1 bit
+        at a time. Instead, each device has a minimum amount of data that it can
+        read and write. If your HDD reads in 4kb blocks, asking for 1 bit is
+        wasteful because the HDD still has to read 4kb. At this point I don't
+        understand what happens to the excess data, but presumably it gets
+        discarded somewhere between the HDD read and returning the requested
+        data to the user?
+      </p>
+
+      <p>
+        Anyway, to recap to the file format: a table's data is 1 file and each
+        file has many 8kb chunks of data called pages. Each page has a specific
+        structure, with Postgres using a format called a "slotted page". Each
+        page has
+      </p>
+
+      <ul>
+        <li>page header (metadata about the page)</li>
+        <li>pointers to records</li>
+        <li>free space</li>
+        <li>records</li>
+      </ul>
+
+      <p>
+        The slotted file format seems odd at first, but it has a big advantage:
+        records can vary in size. If I have a table with a string column, 1 row
+        might contain just 1 letter in that column and another row might contain
+        100s of letters. That would be awkward to store if the database record
+        had a fixed width. With a slotted page, however, it's fine because each
+        pointer stores the start location of a record, without making
+        assumptions about record length.
+      </p>
+
+      <p>
+        The records (your table rows) start at the end of the 8kb page and grow
+        towards the start of the page, eating into the free space. A new pointer
+        is added to the start of the free space (the opposite end to the record)
+        and stores the location of the new record. Over time, the records and
+        pointers grow towards each other. That's convenient because it avoids
+        the need to guess how many pointers might be needed or to keep moving
+        records around to make room for new pointers, as would be necessary if
+        pointers and records were stored next to each other.
+      </p>
+
+      <p>
+        Because a page is always 8kb, on creation a page might be mostly free
+        space between the pointers and the records. Over time the free space
+        fills, there isn't enough space to fit another record between the
+        existing records and the pointers, so another 8kb page is added to the
+        file.
+      </p>
+
+      <p>
+        That's pretty much where I am. The more I read, the more I realise that
+        database design involves a mind boggling number of small details, some
+        of which matter a great deal to performance. I'm defaulting to "what
+        Postgres does" and have so far avoided decision paralysis. And for now
+        I'm not worrying about performance -- I'm just taking tiny steps towards
+        getting something working.
+      </p>
+
+      <h2 id="roughly-how-i-broke-down-the-work">
+        Roughly how I broke down the work
+      </h2>
+
+      <p>
+        This isn't a code-along "Build your own database" kind of post. But I
+        thought I'd include some first steps for the benefit of people who, like
+        me, are curious to try but don't know where to start.
+      </p>
+
+      <p>
+        As described in the post, the basic structure of the database will be a
+        series of directories and files, so I wrote functions to:
+      </p>
+
+      <ul>
+        <li>create nested directories (1 directory per database)</li>
+        <li>create a new file (1 file per table)</li>
+        <li>
+          append exactly 8kb to a file (writing a page) (and at this point I'm
+          just writing 8kb of the number 1)
+        </li>
+        <li>read any specified 8kb from a file (a page read)</li>
+      </ul>
+
+      <p>Each step is very small, but together they're a good start.</p>
+
+      <h2 id="useful-things">Useful things</h2>
+
+      <h3 id="commands">Shell commands</h3>
+
+      <ul>
+        <li>
+          <code>wc -c</code> has been useful for confirming the number of bytes
+          in a file
+        </li>
+        <li>
+          <code>xxd</code> does a nicely formatted dump of the file, useful for
+          confirming the contents
+        </li>
+      </ul>
+
+      <h3 id="resources">Resources</h3>
+
+      <ul>
+        <li>
+          Hironobu Suzuki's writeup
+          <a href="https://www.interdb.jp/pg/">The Internals of PostgreSQL</a>
+          is a fantastic resource. It's currently my goto when I'm unsure how
+          something fits together.
+        </li>
+        <li>
+          The Postgres docs
+          <a href="https://www.postgresql.org/docs/current/overview.html"
+            >Chapter 52: Overview of PostgreSQL Internals</a
+          >
+          and
+          <a href="https://www.postgresql.org/docs/current/storage.html"
+            >Chapter 73: Database Physical Storage</a
+          >
+          have been a great help. They focus on implementation details more than
+          database concepts, so I found them more useful after I'd done other
+          reading.
+        </li>
+        <li>
+          For a conceptual overview, I've watched some of the
+          <a href="https://www.youtube.com/@CS186Berkeley/playlists"
+            >videos for UC Berkeley's CS186 Introduction to Databases</a
+          >. Lectures 4 and 5 cover file formats, including alternatives to
+          slotted pages.
+        </li>
+        <li>
+          Hussein Nasser's
+          <a href="https://www.udemy.com/course/database-engines-crash-course/"
+            >Fundamentals of Database Engineering</a
+          >
+          course on Udemy kick started this whole thing. I'll confess that not
+          all the videos are to my taste -- I like the structured ones where
+          Hussein spends most of the time at a Postgres command line. But
+          there's 25 hours of remarkably accessible info about databases and it
+          inspired me to finally start this project.
+        </li>
+      </ul>
+    </main>
+
+    <footer>&copy; Ellen Potter</footer>
+  </body>
+</html>

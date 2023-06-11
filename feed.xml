@@ -6,6 +6,11 @@
         <description>Notes on software development.</description>
         <language>en-gb</language>
         <item>
+            <title>Building a relational database: File structure</title>
+            <link>https://ellen.dev/building-a-relational-database-file-structure.html</link>
+            <pubDate>Sun, 11 June 2023 12:10:00 GMT</pubDate>
+        </item>
+        <item>
             <title>TIL: Keyboard navigation should tab between components, but not within</title>
             <link>https://ellen.dev/til-tab-between-components-not-within.html</link>
             <pubDate>Wed, 7 June 2023 07:50:00 GMT</pubDate>

@@ -6,6 +6,11 @@
         <description>Notes on software development.</description>
         <language>en-gb</language>
         <item>
+            <title>TIL: Gitlab's default squash behaviour deletes commit messages</title>
+            <link>https://ellen.dev/til-gitlab-default-squash-deletes-commit-messages.html</link>
+            <pubDate>Tue, 12 Sept 2023 20:00:00 GMT</pubDate>
+        </item>
+        <item>
             <title>Building a relational database: File structure</title>
             <link>https://ellen.dev/building-a-relational-database-file-structure.html</link>
             <pubDate>Sun, 11 June 2023 12:10:00 GMT</pubDate>

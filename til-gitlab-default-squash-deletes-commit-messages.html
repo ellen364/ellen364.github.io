@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>
+      TIL: Gitlab's default squash behaviour deletes commit messages
+    </title>
+    <meta name="author" content="Ellen Potter" />
+
+    <link rel="stylesheet" href="css/styles.min.css" />
+    <link
+      rel="canonical"
+      href="https://ellen.dev/til-gitlab-default-squash-deletes-commit-messages.html"
+    />
+  </head>
+
+  <body>
+    <nav class="row">
+      <div class="nav-section">
+        <div class="nav-item"><a href="index.html">Home</a></div>
+        <div class="nav-item">
+          <a type="application/rss+xml" href="feed.xml">RSS</a>
+        </div>
+      </div>
+      <div class="nav-item"><a href="about.html">About</a></div>
+    </nav>
+
+    <main>
+      <h1 id="til-gitlabs-default-squash-behaviour-deletes-commit-messages">
+        TIL: Gitlab's default squash behaviour deletes commit messages
+      </h1>
+
+      <p>
+        Something that's in the docs, but still painful when unexpectedly
+        encountered in the wild.
+      </p>
+
+      <p>
+        Gitlab 14.6 introduced
+        <a href="https://gitlab.com/gitlab-org/gitlab/-/issues/345275"
+          >squash commit templates</a
+        >. If someone ticks the "Squash commits" checkbox in a merge request,
+        the repo's squash template is used when merging. Unfortunately, the
+        <a
+          href="https://docs.gitlab.com/16.3/ee/user/project/merge_requests/commit_templates.html#default-template-for-squash-commits"
+          >default template</a
+        >
+        is
+      </p>
+
+      <pre><code>
+%{title}
+
+</code></pre>
+
+      <p>
+        That's the title of the merge request and nothing else. All commit
+        messages are dropped.
+      </p>
+
+      <p>
+        In git itself, that isn't squash behaviour. The git docs on
+        <a href="https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History"
+          >Rewriting History</a
+        >
+        describe squash as "use commit, but meld into previous commit" and fixup
+        as "like 'squash', but discard this commit's log message".
+      </p>
+
+      <p>
+        Gitlab's default "squash" template effectively fixups the entire MR.
+      </p>
+
+      <p>
+        This seems to have been the case from the introduction of squash
+        templates in Gitlab 14.6 and is still the case in Gitlab 16.3. Luckily,
+        <a
+          href="https://docs.gitlab.com/16.3/ee/user/project/merge_requests/commit_templates.html#supported-variables-in-commit-templates"
+          >commit templates support plenty of variables</a
+        >
+        and more conventional squash behaviour can be achieved by changing the
+        default squash template to
+      </p>
+
+      <pre><code>
+%{title}
+
+%{all_commits}
+
+</code></pre>
+
+      <h2 id="useful-things">Useful things</h2>
+
+      <ul>
+        <li>
+          Gitlab's docs explain
+          <a
+            href="https://docs.gitlab.com/16.3/ee/user/project/merge_requests/commit_templates.html"
+            >how to configure a repository's commit templates</a
+          >
+        </li>
+      </ul>
+    </main>
+
+    <footer>&copy; Ellen Potter</footer>
+  </body>
+</html>

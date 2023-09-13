@@ -6,6 +6,11 @@
         <description>Notes on software development.</description>
         <language>en-gb</language>
         <item>
+            <title>TIL: Firebase Auth lowercases email addresses, despite SMTP</title>
+            <link>https://ellen.dev/til-firebase-auth-lowercases-email-addresses.html</link>
+            <pubDate>Wed, 13 Sept 2023 17:00:00 GMT</pubDate>
+        </item>
+        <item>
             <title>TIL: Gitlab's default squash behaviour deletes commit messages</title>
             <link>https://ellen.dev/til-gitlab-default-squash-deletes-commit-messages.html</link>
             <pubDate>Tue, 12 Sept 2023 20:00:00 GMT</pubDate>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>
+      TIL: Firebase Auth lowercases email addresses, despite SMTP
+    </title>
+    <meta name="author" content="Ellen Potter" />
+
+    <link rel="stylesheet" href="css/styles.min.css" />
+    <link
+      rel="canonical"
+      href="https://ellen.dev/til-firebase-auth-lowercases-email-addresses-despite-smtp.html"
+    />
+  </head>
+
+  <body>
+    <nav class="row">
+      <div class="nav-section">
+        <div class="nav-item"><a href="index.html">Home</a></div>
+        <div class="nav-item">
+          <a type="application/rss+xml" href="feed.xml">RSS</a>
+        </div>
+      </div>
+      <div class="nav-item"><a href="about.html">About</a></div>
+    </nav>
+
+    <main>
+      <h1 id="til-firebase-auth-lowercases-email-addresses-despite-smtp">
+        TIL: Firebase Auth lowercases email addresses, despite SMTP
+      </h1>
+
+      <p>
+        Firebase Auth stores user email addreses in lowercase, regardless of the
+        case passed to Firebase. That can be surprising when comparing email
+        addreseses. It's even more surprising given the risk of sending password
+        reset emails to the wrong person.
+      </p>
+
+      <p>
+        The section of an email address before the <code>@</code> symbol is the
+        "local-part". It's the name of a mailbox in the receiving mail system.
+        Mailbox names are often the same as the username of the user to which
+        the mailbox belongs (<code>username@domain.tld</code>) but they don't
+        have to be. In organisations, role-based local-parts are also common
+        (<code>jobs@domain.tld</code>) and some email providers let users choose
+        any mailbox name that hasn't already been taken.
+      </p>
+
+      <p>
+        SMTP specifies that the local-part of an email address is case
+        sensitive. This means that <code>SomeMailbox</code> does not necessarily
+        equal <code>somemailbox</code>. Each can be a separate mailbox and might
+        belong to different people.
+      </p>
+
+      <p>
+        Given that SMTP specifies local-part case sensitivity, it might be
+        surprising that I said "<code>SomeMailbox</code>
+        <em>does not necessarily</em> equal <code>somemailbox</code>", implying
+        that the two might be equivalent. Many email providers do not use case
+        sensitive local-parts. And, somewhat confusingly, RFCs like RFC 5321
+        actually discourage mail systems from enforcing case sensitivity:
+      </p>
+
+      <blockquote>
+        <p>
+          The local-part of a mailbox MUST BE treated as case sensitive.
+          Therefore, SMTP implementations MUST take care to preserve the case of
+          mailbox local-parts. In particular, for some hosts, the user "smith"
+          is different from the user "Smith". However, exploiting the case
+          sensitivity of mailbox local-parts impedes interoperability and is
+          discouraged.
+        </p>
+        <p>
+          <a href="https://datatracker.ietf.org/doc/html/rfc5321#section-2.4"
+            >RFC 5321 - Simple Mail Transfer Protocol, section 2.4</a
+          >
+        </p>
+      </blockquote>
+
+      <p>
+        I get the impression that SMTP was created with the case sensitive
+        local-part, it began to seem like a bad idea (e.g. lots of users typing
+        <code>johnsmith</code> when they meant <code>JohnSmith</code>),
+        enforcement is now discouraged but the issue never actually dealt with.
+      </p>
+
+      <p>
+        Going back to the start, Firebase Auth converts user email addresses to
+        lowercase, forcing an assumption that case doesn't matter in email
+        addresses. That assumption is incorrect. Where a mail system does use
+        and enforce case sensitive mailbox names, important emails like password
+        resets will be addressed to the wrong mailbox. The person who controls
+        the lowercase mailbox name ultimately controls whatever account is
+        behind Firebase Auth.
+      </p>
+
+      <p>
+        I've discussed this with about half a dozen people and, so far, everyone
+        has assumed that only a tiny number of people could be affected. That
+        was my first thought, too, but then I realised the information available
+        is asymmetric. Large, public email providers like Gmail don't use case
+        sensitive local-parts in their email addresses, so there are lots of
+        free email addresses where this doesn't matter. But what about the many
+        mail systems run by organisations - big companies, universities,
+        government departments? So far, I haven't found any survey of how many
+        mail systems are case sensitive, so it's difficult to know how many
+        people and accounts might be affected. But it's probably more than 0.
+      </p>
+
+      <p>
+        If anyone has a survey that covers enforcement of case sensitive
+        local-parts by mail systems, I'd be interested to read it. Let me know
+        at <a href="mailto:blog@ellen.dev">blog@ellen.dev</a>
+      </p>
+
+      <h2 id="useful-things">Useful things</h2>
+
+      <ul>
+        <li>
+          Cognito handles this better. In 2020 they
+          <a
+            href="https://aws.amazon.com/blogs/security/how-to-set-case-sensitivity-in-the-amazon-cognito-console/"
+            >switched the default behaviour</a
+          >
+          so that new user pools are case insensitive, but that
+          <a
+            href="https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-case-sensitivity.html"
+            >setting can be overridden</a
+          >. I haven't found an equivalent for Firebase Auth.
+        </li>
+        <li>
+          <a href="https://datatracker.ietf.org/doc/html/rfc821">RFC 821</a> is
+          the earliest RFC for SMTP. Section 2 and the scenarios in Appendix F
+          have language suggesting that mailbox names matched their user's name,
+          with a simple 1 mailbox to 1 user relationship. 40 years later, things
+          like email aliases and shared mailboxes (e.g. for customer service)
+          have complicated that relationship.
+        </li>
+      </ul>
+    </main>
+  </body>
+
+  <footer>&copy; Ellen Potter</footer>
+</html>
